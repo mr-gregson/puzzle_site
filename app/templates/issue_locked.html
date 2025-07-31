@@ -1,0 +1,5 @@
+{% extends "base.html" %}
+{% block content %}
+<h2>{{ issue.title }}</h2>
+<p>📅 <strong>{{ issue.title }}</strong> will be available on <strong>{{ issue.available_date.strftime('%B %d, %Y at %H:%M UTC') }}</strong>.</p>
+{% endblock %}

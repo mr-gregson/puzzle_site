@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+{% block content %}
+<h2>User Management</h2>
+<table border="1">
+    <tr>
+        <th>ID</th>
+        <th>Username</th>
+        <th>Email</th>
+        <th>Admin?</th>
+        <th>Actions</th>
+    </tr>
+    {% for user in users %}
+    <tr>
+        <td>{{ user.id }}</td>
+        <td>{{ user.username }}</td>
+        <td>{{ user.email }}</td>
+        <td>{{ 'Yes' if user.is_admin else 'No' }}</td>
+        <td>
+            {% if not user.is_admin %}
+                <a href="{{ url_for('admin.delete_user', user_id=user.id) }}">Delete</a>
+            {% else %}
+                —
+            {% endif %}
+        </td>
+    </tr>
+    {% endfor %}
+</table>
+
+<h3>Admin Tools</h3>
+<ul>
+  <li><a href="{{ url_for('admin.add_puzzle') }}">Add New Puzzle</a></li>
+  <li><a href="{{ url_for('admin.add_hint') }}">Add New Hint</a></li>
+</ul>
+
+{% endblock %}

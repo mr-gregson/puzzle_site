@@ -1,0 +1,13 @@
+{% extends "base.html" %}
+{% block content %}
+<h2>Available Issues</h2>
+<ul>
+  {% for issue in issues %}
+    {% if issue.available_date <= current_time %}
+      <li><a href="{{ url_for('puzzle.issue_detail', issue_id=issue.id) }}">{{ issue.title }}</a></li>
+    {% else %}
+      <li><em>{{ issue.title }} available {{ issue.available_date.strftime('%B %d, %Y') }}</em></li>
+    {% endif %}
+  {% endfor %}
+</ul>
+{% endblock %}

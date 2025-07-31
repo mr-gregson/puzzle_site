@@ -11,14 +11,20 @@ auth = Blueprint('auth', __name__)
 def register():
     form = RegisterForm()
     if form.validate_on_submit():
-        existing_user = User.query.filter_by(username=form.username.data).first()
-        if existing_user:
+        # Check for existing username
+        if User.query.filter_by(username=form.username.data).first():
             flash('Username already exists.')
+            return redirect(url_for('auth.register'))
+
+        # ✅ Check for existing email
+        if User.query.filter_by(email=form.email.data).first():
+            flash('Email already registered.')
             return redirect(url_for('auth.register'))
 
         hashed_password = generate_password_hash(form.password.data)
         new_user = User(
             username=form.username.data,
+            display_name=form.display_name.data,
             email=form.email.data,
             password=hashed_password
         )

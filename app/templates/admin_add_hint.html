@@ -1,0 +1,12 @@
+{% extends "base.html" %}
+{% block content %}
+<h2>Add Hint</h2>
+<form method="POST">
+    {{ form.hidden_tag() }}
+    {{ form.puzzle_id.label }}<br>{{ form.puzzle_id() }}<br><br>
+    {{ form.hint_text.label }}<br>{{ form.hint_text(rows=3, cols=60) }}<br><br>
+    {{ form.unlock_date.label }}<br>{{ form.unlock_date() }}<br><br>
+    {{ form.submit() }}
+</form>
+<a href="{{ url_for('admin.user_list') }}">Back to Admin Panel</a>
+{% endblock %}

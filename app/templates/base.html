@@ -1,27 +1,57 @@
 <!-- app/templates/base.html -->
 <!DOCTYPE html>
 <html>
+
 <head>
-    <title>Puzzle Site</title>
+    <meta charset="UTF-8">
+    <title>{% block title %}Puzzle Site{% endblock %}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
+
+<script>
+function toggleHint(id) {
+    const hintDiv = document.getElementById('hint-' + id);
+    const button = event.currentTarget;
+
+    if (hintDiv.style.display === 'none') {
+        hintDiv.style.display = 'block';
+        button.textContent = '▼ ' + button.textContent.slice(2);
+    } else {
+        hintDiv.style.display = 'none';
+        button.textContent = '▶ ' + button.textContent.slice(2);
+    }
+}
+</script>
+
 <body>
-    <nav>
-        <a href="{{ url_for('main.index') }}">Home</a>
-        {% if current_user.is_authenticated %}
-            <a href="{{ url_for('auth.logout') }}">Logout</a>
-        {% else %}
-            <a href="{{ url_for('auth.login') }}">Login</a>
-            <a href="{{ url_for('auth.register') }}">Register</a>
+  <nav>
+    <a href="{{ url_for('main.index') }}">Home</a>
+    {% if current_user.is_authenticated %}
+        <a href="{{ url_for('puzzle.list_puzzles') }}">Puzzles</a>
+        {% if current_user.is_admin %}
+            <a href="{{ url_for('admin.dashboard') }}">Admin Dashboard</a>
         {% endif %}
-    </nav>
-    <hr>
-    {% with messages = get_flashed_messages() %}
-      {% if messages %}
-        <ul>{% for message in messages %}
-          <li>{{ message }}</li>
-        {% endfor %}</ul>
-      {% endif %}
-    {% endwith %}
-    {% block content %}{% endblock %}
+        <a href="{{ url_for('auth.logout') }}">Logout</a>
+    {% else %}
+        <a href="{{ url_for('auth.login') }}">Login</a>
+        <a href="{{ url_for('auth.register') }}">Register</a>
+    {% endif %}
+</nav>
+
+
+  <div class="container">
+        {% with messages = get_flashed_messages() %}
+            {% if messages %}
+                <div class="flash-message">
+                    {% for message in messages %}
+                        <p>{{ message }}</p>
+                    {% endfor %}
+                </div>
+            {% endif %}
+        {% endwith %}
+
+        {% block content %}{% endblock %}
+    </div>
 </body>
+
 </html>

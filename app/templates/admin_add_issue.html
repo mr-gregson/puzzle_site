@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+{% block content %}
+<h2>Create a New Issue</h2>
+
+<form method="POST">
+    {{ form.hidden_tag() }}
+    {{ form.title.label }}<br>{{ form.title(size=50) }}<br><br>
+    {{ form.description.label }}<br>{{ form.description(rows=4, cols=60) }}<br><br>
+    {{ form.pdf_filename.label }}<br>{{ form.pdf_filename(size=50) }}<br><br>
+    {{ form.available_date.label }}<br>{{ form.available_date() }}<br><br>
+    {{ form.submit() }}
+</form>
+
+<a href="{{ url_for('admin.dashboard') }}">Back to Admin Dashboard</a>
+{% endblock %}

@@ -1,0 +1,13 @@
+{% extends "base.html" %}
+{% block content %}
+<h2>Add Puzzle</h2>
+<form method="POST">
+    {{ form.hidden_tag() }}
+    {{ form.title.label }}<br>{{ form.title(size=50) }}<br><br>
+    {{ form.description.label }}<br>{{ form.description(rows=4, cols=60) }}<br><br>
+    {{ form.issue_id.label }}<br>{{ form.issue_id() }}<br><br>
+    {{ form.answer.label }}<br>{{ form.answer(size=50) }}<br><br>
+    {{ form.submit() }}
+</form>
+<a href="{{ url_for('admin.user_list') }}">Back to Admin Panel</a>
+{% endblock %}

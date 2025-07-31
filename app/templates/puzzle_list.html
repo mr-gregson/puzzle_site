@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+{% block content %}
+<h2>Available Puzzles</h2>
+<table border="1">
+  <tr>
+    <th>Title</th>
+    <th>Description</th>
+    <th>Link</th>
+  </tr>
+  {% for puzzle in puzzles %}
+  <tr>
+    <td>{{ puzzle.title }}</td>
+    <td>{{ puzzle.description }}</td>
+    <td><a href="{{ url_for('puzzle.puzzle_detail', puzzle_id=puzzle.id) }}">View</a></td>
+  </tr>
+  {% endfor %}
+</table>
+{% endblock %}

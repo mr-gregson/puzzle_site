@@ -1,6 +1,7 @@
 from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 from flask_login import LoginManager
+from .models import db, User, Issue, Puzzle, Submission
 import os
 
 db = SQLAlchemy()
@@ -8,6 +9,16 @@ login_manager = LoginManager()
 
 def create_app():
     app = Flask(__name__, instance_relative_config=True)
+    
+    @app.shell_context_processor
+    def make_shell_context():
+        return {
+            'db': db,
+            'User': User,
+            'Issue': Issue,
+            'Puzzle': Puzzle,
+            'Submission': Submission
+        }
 
     # Load config
     app.config.from_mapping(
@@ -29,10 +40,15 @@ def create_app():
     # Import and register blueprints
     from . import routes
     app.register_blueprint(routes.bp)
+    app.register_blueprint(routes.admin_bp)
 
     from .auth import auth
     app.register_blueprint(auth)
 
     from . import models
 
+    from .puzzles import puzzle_bp
+    app.register_blueprint(puzzle_bp)
+
     return app
+

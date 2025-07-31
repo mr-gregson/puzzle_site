@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+{% block content %}
+<h2>{{ issue.title }}</h2>
+<p>{{ issue.description }}</p>
+
+<table>
+  <tr>
+    <th>Puzzle</th>
+    <th>Status</th>
+    <th>Your Answer</th>
+    <th>Link</th>
+  </tr>
+  {% if issue.pdf_filename %}
+  <p>
+    📄 <a href="{{ url_for('static', filename='pdfs/' + issue.pdf_filename) }}" target="_blank" download>
+      Download this issue as a PDF
+    </a>
+  </p>
+{% endif %}
+  {% for puzzle in issue.puzzles %}
+  <tr>
+    <td>{{ puzzle.title }}</td>
+    <td>
+      {% if puzzle.id in solved_lookup %}
+        ✅ Solved
+      {% else %}
+        ❌ Not yet
+      {% endif %}
+    </td>
+    <td>
+      {% if puzzle.id in solved_lookup %}
+        {{ solved_lookup[puzzle.id].submitted_answer }}
+      {% else %}
+        —
+      {% endif %}
+    </td>
+    <td>
+      <a href="{{ url_for('puzzle.puzzle_detail', puzzle_id=puzzle.id) }}">View</a>
+    </td>
+  </tr>
+  {% endfor %}
+</table>
+{% endblock %}

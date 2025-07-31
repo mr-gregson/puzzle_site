@@ -1,0 +1,10 @@
+{% extends "base.html" %}
+{% block content %}
+<h2>Admin Dashboard</h2>
+<ul>
+  <li><a href="{{ url_for('admin.user_list') }}">Manage Users</a></li>
+  <li><a href="{{ url_for('admin.add_issue') }}">Create New Issue</a></li>
+  <li><a href="{{ url_for('admin.add_puzzle') }}">Create a New Puzzle</a></li>
+  <li><a href="{{ url_for('admin.add_hint') }}">Add a Hint to a Puzzle</a></li>
+</ul>
+{% endblock %}
