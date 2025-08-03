@@ -1,43 +1,83 @@
 {% extends "base.html" %}
-{% block content %}
-<h2>{{ issue.title }}</h2>
-<p>{{ issue.description }}</p>
 
-<table>
-  <tr>
-    <th>Puzzle</th>
-    <th>Status</th>
-    <th>Your Answer</th>
-    <th>Link</th>
-  </tr>
-  {% if issue.pdf_filename %}
-  <p>
-    📄 <a href="{{ url_for('static', filename='pdfs/' + issue.pdf_filename) }}" target="_blank" download>
-      Download this issue as a PDF
-    </a>
-  </p>
+{% block breadcrumbs %}
+<div class="breadcrumbs">
+  <div class="container">
+    <a href="{{ url_for('puzzle.list_issues') }}">Issues</a>
+    <span class="breadcrumb-separator">›</span>
+    <span class="breadcrumb-current">{{ issue.title }}</span>
+  </div>
+</div>
+{% endblock %}
+
+{% block content %}
+<div class="issue-header">
+  <h2>{{ issue.title }}</h2>
+  <div class="issue-progress-summary">
+    {% set solved_count = solved_lookup|length %}
+    {% set total_count = issue.puzzles|length %}
+    {% set progress_percentage = (solved_count / total_count * 100) if total_count > 0 else 0 %}
+    
+    <div class="progress-container">
+      <div class="progress-bar">
+        <div class="progress-fill" style="width: {{ progress_percentage }}%"></div>
+      </div>
+      <span class="progress-text">{{ solved_count }}/{{ total_count }} puzzles solved ({{ "%.0f"|format(progress_percentage) }}%)</span>
+    </div>
+  </div>
+</div>
+
+{% if issue.description %}
+  <div class="issue-description">
+    <p>{{ issue.description }}</p>
+  </div>
 {% endif %}
-  {% for puzzle in issue.puzzles %}
-  <tr>
-    <td>{{ puzzle.title }}</td>
-    <td>
-      {% if puzzle.id in solved_lookup %}
-        ✅ Solved
-      {% else %}
-        ❌ Not yet
-      {% endif %}
-    </td>
-    <td>
-      {% if puzzle.id in solved_lookup %}
-        {{ solved_lookup[puzzle.id].submitted_answer }}
-      {% else %}
-        —
-      {% endif %}
-    </td>
-    <td>
-      <a href="{{ url_for('puzzle.puzzle_detail', puzzle_id=puzzle.id) }}">View</a>
-    </td>
-  </tr>
-  {% endfor %}
-</table>
+
+{% if issue.pdf_filename %}
+  <div class="issue-download">
+    <p>
+      📄 <a href="{{ url_for('static', filename='pdfs/' + issue.pdf_filename) }}" target="_blank" download>
+        Download this issue as a PDF
+      </a>
+    </p>
+  </div>
+{% endif %}
+
+<div class="puzzles-section">
+  <h3>Puzzles</h3>
+  <div class="puzzles-grid">
+    {% for puzzle in issue.puzzles %}
+      <div class="puzzle-card {% if puzzle.id in solved_lookup %}solved{% else %}unsolved{% endif %}">
+        <div class="puzzle-status">
+          {% if puzzle.id in solved_lookup %}
+            <span class="status-badge solved">✅ Solved</span>
+          {% else %}
+            <span class="status-badge unsolved">🔍 Unsolved</span>
+          {% endif %}
+        </div>
+        
+        <h4><a href="{{ url_for('puzzle.puzzle_detail', puzzle_id=puzzle.id) }}">{{ puzzle.title }}</a></h4>
+        
+        {% if puzzle.id in solved_lookup %}
+          <div class="user-answer">
+            <strong>Your answer:</strong> {{ solved_lookup[puzzle.id].submitted_answer }}
+          </div>
+        {% endif %}
+        
+        <div class="puzzle-actions">
+          <a href="{{ url_for('puzzle.puzzle_detail', puzzle_id=puzzle.id) }}" class="action-btn">
+            {% if puzzle.id in solved_lookup %}Review{% else %}Solve{% endif %}
+          </a>
+        </div>
+      </div>
+    {% endfor %}
+  </div>
+</div>
+
+{% if solved_count == total_count and total_count > 0 %}
+  <div class="completion-celebration">
+    🎉 Congratulations! You've completed all puzzles in this issue!
+  </div>
+{% endif %}
+
 {% endblock %}

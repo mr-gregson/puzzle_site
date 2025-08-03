@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+{% block content %}
+<h2>Manage Issues</h2>
+
+<div class="admin-header">
+    <a href="{{ url_for('admin.add_issue') }}" class="action-btn">Add New Issue</a>
+    <a href="{{ url_for('admin.dashboard') }}" class="action-btn">Back to Dashboard</a>
+</div>
+
+<table>
+    <tr>
+        <th>ID</th>
+        <th>Title</th>
+        <th>Available Date</th>
+        <th>PDF File</th>
+        <th>Puzzles Count</th>
+        <th>Actions</th>
+    </tr>
+    {% for issue in issues %}
+    <tr>
+        <td>{{ issue.id }}</td>
+        <td>{{ issue.title }}</td>
+        <td><span data-utc-datetime="{{ issue.available_date.strftime('%Y-%m-%d %H:%M:%S') }}" data-format="short">{{ issue.available_date.strftime('%Y-%m-%d %H:%M') }}</span></td>
+        <td>{{ issue.pdf_filename if issue.pdf_filename else 'None' }}</td>
+        <td>{{ issue.puzzles|length }}</td>
+        <td>
+            <a href="{{ url_for('admin.edit_issue', issue_id=issue.id) }}">Edit</a> |
+            <a href="{{ url_for('admin.delete_issue', issue_id=issue.id) }}" 
+               onclick="return confirm('Are you sure you want to delete this issue?')">Delete</a>
+        </td>
+    </tr>
+    {% endfor %}
+</table>
+
+{% if not issues %}
+<p>No issues found. <a href="{{ url_for('admin.add_issue') }}">Create your first issue</a>.</p>
+{% endif %}
+
+{% endblock %}

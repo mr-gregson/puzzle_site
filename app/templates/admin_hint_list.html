@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+{% block content %}
+<h2>Manage Hints</h2>
+
+<div class="admin-header">
+    <a href="{{ url_for('admin.add_hint') }}" class="action-btn">Add New Hint</a>
+    <a href="{{ url_for('admin.dashboard') }}" class="action-btn">Back to Dashboard</a>
+</div>
+
+<table>
+    <tr>
+        <th>ID</th>
+        <th>Puzzle</th>
+        <th>Hint Text</th>
+        <th>Unlock Date</th>
+        <th>Actions</th>
+    </tr>
+    {% for hint in hints %}
+    <tr>
+        <td>{{ hint.id }}</td>
+        <td>{{ hint.puzzle.title }}</td>
+        <td>{{ hint.hint_text[:50] }}{{ '...' if hint.hint_text|length > 50 else '' }}</td>
+        <td>{{ hint.unlock_date.strftime('%Y-%m-%d') }}</td>
+        <td>
+            <a href="{{ url_for('admin.edit_hint', hint_id=hint.id) }}">Edit</a> |
+            <a href="{{ url_for('admin.delete_hint', hint_id=hint.id) }}" 
+               onclick="return confirm('Are you sure you want to delete this hint?')">Delete</a>
+        </td>
+    </tr>
+    {% endfor %}
+</table>
+
+{% if not hints %}
+<p>No hints found. <a href="{{ url_for('admin.add_hint') }}">Create your first hint</a>.</p>
+{% endif %}
+
+{% endblock %}

@@ -21,22 +21,89 @@ function toggleHint(id) {
         button.textContent = '▶ ' + button.textContent.slice(2);
     }
 }
+
+// Convert UTC dates to local timezone
+function convertDatesToLocal() {
+    const dateElements = document.querySelectorAll('[data-utc-datetime]');
+    
+    dateElements.forEach(function(element) {
+        const utcDatetime = element.getAttribute('data-utc-datetime');
+        const utcDate = new Date(utcDatetime + 'Z'); // Add Z to ensure UTC parsing
+        
+        const format = element.getAttribute('data-format') || 'full';
+        let formattedDate;
+        
+        if (format === 'date') {
+            formattedDate = utcDate.toLocaleDateString();
+        } else if (format === 'time') {
+            formattedDate = utcDate.toLocaleTimeString();
+        } else if (format === 'short') {
+            formattedDate = utcDate.toLocaleDateString() + ' ' + utcDate.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+        } else if (format === 'relative') {
+            formattedDate = getRelativeTime(utcDate);
+        } else {
+            // Full format
+            formattedDate = utcDate.toLocaleString();
+        }
+        
+        element.textContent = formattedDate;
+    });
+}
+
+function getRelativeTime(date) {
+    const now = new Date();
+    const diffMs = now - date;
+    const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+    const diffHours = Math.floor(diffMs / (1000 * 60 * 60));
+    const diffMinutes = Math.floor(diffMs / (1000 * 60));
+    
+    if (diffDays > 0) {
+        return diffDays === 1 ? '1 day ago' : `${diffDays} days ago`;
+    } else if (diffHours > 0) {
+        return diffHours === 1 ? '1 hour ago' : `${diffHours} hours ago`;
+    } else if (diffMinutes > 0) {
+        return diffMinutes === 1 ? '1 minute ago' : `${diffMinutes} minutes ago`;
+    } else {
+        return 'Just now';
+    }
+}
+
+// Run conversion when page loads
+document.addEventListener('DOMContentLoaded', convertDatesToLocal);
 </script>
 
 <body>
   <nav>
-    <a href="{{ url_for('main.index') }}">Home</a>
-    {% if current_user.is_authenticated %}
-        <a href="{{ url_for('puzzle.list_puzzles') }}">Puzzles</a>
-        {% if current_user.is_admin %}
-            <a href="{{ url_for('admin.dashboard') }}">Admin Dashboard</a>
+    <div class="nav-content">
+      <div class="nav-logo">
+        <img src="{{ url_for('static', filename='img/logo.png') }}" alt="Logo">
+      </div>
+      <div class="nav-links">
+        {% if current_user.is_authenticated %}
+            <a href="{{ url_for('puzzle.user_dashboard') }}">Dashboard</a>
+            <a href="{{ url_for('puzzle.list_issues') }}">Issues</a>
+            <a href="{{ url_for('puzzle.list_puzzles') }}">All Puzzles</a>
+            {% if current_user.is_admin %}
+                <a href="{{ url_for('admin.dashboard') }}">Admin</a>
+            {% endif %}
+        {% else %}
+            <a href="{{ url_for('main.index') }}">Home</a>
+            <a href="{{ url_for('auth.login') }}">Login</a>
+            <a href="{{ url_for('auth.register') }}">Register</a>
         {% endif %}
-        <a href="{{ url_for('auth.logout') }}">Logout</a>
-    {% else %}
-        <a href="{{ url_for('auth.login') }}">Login</a>
-        <a href="{{ url_for('auth.register') }}">Register</a>
-    {% endif %}
+      </div>
+      {% if current_user.is_authenticated %}
+        <div class="user-profile">
+          <div class="user-info">
+            <span class="user-name">{{ current_user.username }}</span>
+            <a href="{{ url_for('auth.logout') }}" class="logout-link">Logout</a>
+          </div>
+        </div>
+      {% endif %}
+    </div>
 </nav>
+
+  {% block breadcrumbs %}{% endblock %}
 
 
   <div class="container">

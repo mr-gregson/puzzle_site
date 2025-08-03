@@ -1,34 +1,150 @@
 {% extends "base.html" %}
+
+{% block breadcrumbs %}
+<div class="breadcrumbs">
+  <div class="container">
+    {% if puzzle.issue %}
+      <a href="{{ url_for('puzzle.list_issues') }}">Issues</a>
+      <span class="breadcrumb-separator">›</span>
+      <a href="{{ url_for('puzzle.issue_detail', issue_id=puzzle.issue.id) }}">{{ puzzle.issue.title }}</a>
+      <span class="breadcrumb-separator">›</span>
+      <span class="breadcrumb-current">{{ puzzle.title }}</span>
+    {% else %}
+      <a href="{{ url_for('puzzle.list_puzzles') }}">All Puzzles</a>
+      <span class="breadcrumb-separator">›</span>
+      <span class="breadcrumb-current">{{ puzzle.title }}</span>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}
+
 {% block content %}
-<h2>{{ puzzle.title }}</h2>
-<p>{{ puzzle.description }}</p>
+<div class="puzzle-header">
+  <div class="puzzle-nav">
+    {% if puzzle.issue %}
+      <a href="{{ url_for('puzzle.issue_detail', issue_id=puzzle.issue.id) }}" class="back-link">
+        ← Back to {{ puzzle.issue.title }}
+      </a>
+    {% else %}
+      <a href="{{ url_for('puzzle.list_puzzles') }}" class="back-link">
+        ← Back to All Puzzles
+      </a>
+    {% endif %}
+  </div>
+  
+  <h2>{{ puzzle.title }}</h2>
+  
+  {% if correct %}
+    <div class="puzzle-status solved-status">
+      <span class="status-icon">✅</span>
+      <span class="status-text">Puzzle Solved!</span>
+    </div>
+  {% else %}
+    <div class="puzzle-status unsolved-status">
+      <span class="status-icon">🔍</span>
+      <span class="status-text">Ready to Solve</span>
+    </div>
+  {% endif %}
+</div>
 
-{% if correct %}
-  <p style="color: green;"><strong>Correct answer submitted!</strong></p>
-{% else %}
-  <form method="POST">
-    {{ form.hidden_tag() }}
-    {{ form.answer.label }} {{ form.answer(size=40) }}
-    {{ form.submit() }}
-  </form>
-{% endif %}
+<div class="puzzle-content">
+  <div class="puzzle-description">
+    {{ puzzle.description }}
+  </div>
 
-<h3>Hints</h3>
-
-{% if unlocked_hints %}
-  <ul>
-    {% for hint in unlocked_hints %}
-      <li>
-        <button class="hint-toggle" type="button" onclick="toggleHint('{{ hint.id }}')">
-          ▶ Hint {{ loop.index }}
-        </button>
-        <div id="hint-{{ hint.id }}" class="hint-body" style="display: none; margin-top: 5px;">
-          {{ hint.hint_text }}
+  {% if correct %}
+    <div class="success-message">
+      <div class="success-header">
+        <h3>🎉 Congratulations!</h3>
+        <p>You've successfully solved this puzzle.</p>
+      </div>
+      {% set user_submission = None %}
+      {% for submission in puzzle.submissions %}
+        {% if submission.user_id == current_user.id and submission.is_correct %}
+          {% set user_submission = submission %}
+        {% endif %}
+      {% endfor %}
+      {% if user_submission %}
+        <div class="user-solution">
+          <strong>Your answer:</strong> <span class="answer-text">{{ user_submission.submitted_answer }}</span>
         </div>
-      </li>
-    {% endfor %}
-  </ul>
-{% else %}
-  <p>No hints yet.</p>
-{% endif %}
+        <div class="submission-time">
+          Solved on <span data-utc-datetime="{{ user_submission.submitted_at.strftime('%Y-%m-%d %H:%M:%S') }}" data-format="full">{{ user_submission.submitted_at.strftime('%B %d, %Y at %I:%M %p') }}</span>
+        </div>
+      {% endif %}
+    </div>
+  {% else %}
+    <div class="puzzle-form">
+      <h3>Submit Your Answer</h3>
+      <form method="POST" id="puzzle-form">
+        {{ form.hidden_tag() }}
+        <div class="form-group">
+          {{ form.answer.label(class="form-label") }}
+          {{ form.answer(size=40, class="form-input", placeholder="Enter your answer here...") }}
+        </div>
+        <div class="form-actions">
+          {{ form.submit(class="submit-btn") }}
+        </div>
+      </form>
+    </div>
+  {% endif %}
+</div>
+
+<div class="hints-section">
+  <h3>Hints</h3>
+  
+  {% if unlocked_hints %}
+    <div class="hints-container">
+      {% for hint in unlocked_hints %}
+        <div class="hint-item">
+          <button class="hint-toggle" type="button" onclick="toggleHint('{{ hint.id }}')">
+            <span class="hint-icon">▶</span>
+            <span class="hint-label">Hint {{ loop.index }}</span>
+          </button>
+          <div id="hint-{{ hint.id }}" class="hint-body" style="display: none;">
+            <div class="hint-content">
+              {{ hint.hint_text }}
+            </div>
+          </div>
+        </div>
+      {% endfor %}
+    </div>
+  {% else %}
+    <div class="no-hints">
+      <p>🤔 No hints are available yet. Check back later!</p>
+    </div>
+  {% endif %}
+</div>
+
+<script>
+function toggleHint(id) {
+    const hintDiv = document.getElementById('hint-' + id);
+    const button = event.currentTarget;
+    const icon = button.querySelector('.hint-icon');
+
+    if (hintDiv.style.display === 'none' || hintDiv.style.display === '') {
+        hintDiv.style.display = 'block';
+        icon.textContent = '▼';
+        button.classList.add('expanded');
+    } else {
+        hintDiv.style.display = 'none';
+        icon.textContent = '▶';
+        button.classList.remove('expanded');
+    }
+}
+
+// Flash message auto-hide after 5 seconds
+document.addEventListener('DOMContentLoaded', function() {
+    const flashMessages = document.querySelectorAll('.flash-message');
+    flashMessages.forEach(function(message) {
+        setTimeout(function() {
+            message.style.opacity = '0';
+            setTimeout(function() {
+                message.style.display = 'none';
+            }, 500);
+        }, 5000);
+    });
+});
+</script>
+
 {% endblock %}

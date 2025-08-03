@@ -1,10 +1,90 @@
 {% extends "base.html" %}
 {% block content %}
 <h2>Admin Dashboard</h2>
-<ul>
-  <li><a href="{{ url_for('admin.user_list') }}">Manage Users</a></li>
-  <li><a href="{{ url_for('admin.add_issue') }}">Create New Issue</a></li>
-  <li><a href="{{ url_for('admin.add_puzzle') }}">Create a New Puzzle</a></li>
-  <li><a href="{{ url_for('admin.add_hint') }}">Add a Hint to a Puzzle</a></li>
-</ul>
+
+<div class="admin-stats">
+    <h3>Site Statistics</h3>
+    <div class="stats-grid">
+        <div class="stat-item">
+            <h4>{{ stats.total_users }}</h4>
+            <p>Total Users</p>
+        </div>
+        <div class="stat-item">
+            <h4>{{ stats.total_puzzles }}</h4>
+            <p>Total Puzzles</p>
+        </div>
+        <div class="stat-item">
+            <h4>{{ stats.total_issues }}</h4>
+            <p>Total Issues</p>
+        </div>
+        <div class="stat-item">
+            <h4>{{ stats.total_submissions }}</h4>
+            <p>Total Submissions</p>
+        </div>
+        <div class="stat-item">
+            <h4>{{ stats.correct_submissions }}</h4>
+            <p>Correct Submissions</p>
+        </div>
+        <div class="stat-item">
+            <h4>{{ "%.1f"|format((stats.correct_submissions / stats.total_submissions * 100) if stats.total_submissions > 0 else 0) }}%</h4>
+            <p>Success Rate</p>
+        </div>
+    </div>
+</div>
+
+<div class="admin-actions">
+    <h3>Quick Actions</h3>
+    <div class="action-grid">
+        <a href="{{ url_for('admin.user_list') }}" class="action-btn">Manage Users</a>
+        <a href="{{ url_for('admin.puzzle_list') }}" class="action-btn">Manage Puzzles</a>
+        <a href="{{ url_for('admin.issue_list') }}" class="action-btn">Manage Issues</a>
+        <a href="{{ url_for('admin.hint_list') }}" class="action-btn">Manage Hints</a>
+        <a href="{{ url_for('admin.add_issue') }}" class="action-btn">Create New Issue</a>
+        <a href="{{ url_for('admin.add_puzzle') }}" class="action-btn">Create New Puzzle</a>
+        <a href="{{ url_for('admin.add_hint') }}" class="action-btn">Add New Hint</a>
+    </div>
+</div>
+
+<div class="recent-activity">
+    <h3>Recent Activity</h3>
+    <div class="activity-section">
+        <h4>Recent Users</h4>
+        <table>
+            <tr>
+                <th>ID</th>
+                <th>Username</th>
+                <th>Email</th>
+                <th>Admin</th>
+            </tr>
+            {% for user in stats.recent_users %}
+            <tr>
+                <td>{{ user.id }}</td>
+                <td>{{ user.username }}</td>
+                <td>{{ user.email }}</td>
+                <td>{{ 'Yes' if user.is_admin else 'No' }}</td>
+            </tr>
+            {% endfor %}
+        </table>
+    </div>
+
+    <div class="activity-section">
+        <h4>Recent Submissions</h4>
+        <table>
+            <tr>
+                <th>User</th>
+                <th>Puzzle</th>
+                <th>Correct</th>
+                <th>Submitted</th>
+            </tr>
+            {% for submission in stats.recent_submissions %}
+            <tr>
+                <td>{{ submission.user.username }}</td>
+                <td>{{ submission.puzzle.title }}</td>
+                <td>{{ 'Yes' if submission.is_correct else 'No' }}</td>
+                <td><span data-utc-datetime="{{ submission.submitted_at.strftime('%Y-%m-%d %H:%M:%S') }}" data-format="short">{{ submission.submitted_at.strftime('%Y-%m-%d %H:%M') }}</span></td>
+            </tr>
+            {% endfor %}
+        </table>
+    </div>
+</div>
 {% endblock %}

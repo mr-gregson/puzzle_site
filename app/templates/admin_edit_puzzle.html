@@ -1,0 +1,47 @@
+{% extends "base.html" %}
+{% block content %}
+<h2>Edit Puzzle: {{ puzzle.title }}</h2>
+
+<form method="POST">
+    {{ form.hidden_tag() }}
+    
+    <div>
+        {{ form.title.label }}
+        {{ form.title() }}
+        {% if form.title.errors %}
+            <div class="error">{{ form.title.errors[0] }}</div>
+        {% endif %}
+    </div>
+    
+    <div>
+        {{ form.description.label }}
+        {{ form.description(rows=5) }}
+        {% if form.description.errors %}
+            <div class="error">{{ form.description.errors[0] }}</div>
+        {% endif %}
+    </div>
+    
+    <div>
+        {{ form.answer.label }}
+        {{ form.answer(placeholder="Leave blank to keep current answer") }}
+        {% if form.answer.errors %}
+            <div class="error">{{ form.answer.errors[0] }}</div>
+        {% endif %}
+        <small>Leave blank to keep the current answer unchanged.</small>
+    </div>
+    
+    <div>
+        {{ form.issue_id.label }}
+        {{ form.issue_id() }}
+        {% if form.issue_id.errors %}
+            <div class="error">{{ form.issue_id.errors[0] }}</div>
+        {% endif %}
+    </div>
+    
+    <div>
+        <input type="submit" value="Update Puzzle">
+        <a href="{{ url_for('admin.puzzle_list') }}">Cancel</a>
+    </div>
+</form>
+
+{% endblock %}

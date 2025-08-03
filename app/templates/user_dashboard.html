@@ -1,0 +1,134 @@
+{% extends "base.html" %}
+
+{% block breadcrumbs %}
+<div class="breadcrumbs">
+  <div class="container">
+    <a href="{{ url_for('puzzle.list_issues') }}">Issues</a>
+    <span class="breadcrumb-separator">›</span>
+    <span class="breadcrumb-current">Dashboard</span>
+  </div>
+</div>
+{% endblock %}
+
+{% block content %}
+<div class="dashboard-header">
+  <h2>Your Dashboard</h2>
+  <p class="welcome-text">Welcome back, {{ current_user.username }}! Here's your progress overview.</p>
+</div>
+
+<div class="dashboard-stats">
+  <h3>Your Statistics</h3>
+  <div class="stats-grid">
+    <div class="stat-card">
+      <div class="stat-number">{{ stats.solved_puzzles }}</div>
+      <div class="stat-label">Puzzles Solved</div>
+      <div class="stat-detail">out of {{ stats.total_puzzles }} total</div>
+    </div>
+    
+    <div class="stat-card">
+      <div class="stat-number">{{ "%.1f"|format(stats.completion_rate) }}%</div>
+      <div class="stat-label">Completion Rate</div>
+      <div class="stat-detail">overall progress</div>
+    </div>
+    
+    <div class="stat-card">
+      <div class="stat-number">{{ stats.total_submissions }}</div>
+      <div class="stat-label">Total Attempts</div>
+      <div class="stat-detail">{{ stats.correct_submissions }} correct</div>
+    </div>
+    
+    <div class="stat-card">
+      <div class="stat-number">{{ "%.1f"|format(stats.success_rate) }}%</div>
+      <div class="stat-label">Success Rate</div>
+      <div class="stat-detail">on submissions</div>
+    </div>
+  </div>
+</div>
+
+<div class="dashboard-progress">
+  <h3>Progress by Issue</h3>
+  {% if stats.issues_progress %}
+    <div class="issues-progress-grid">
+      {% for item in stats.issues_progress %}
+        <div class="issue-progress-card">
+          <div class="issue-info">
+            <h4><a href="{{ url_for('puzzle.issue_detail', issue_id=item.issue.id) }}">{{ item.issue.title }}</a></h4>
+            <div class="progress-summary">{{ item.solved }}/{{ item.total }} puzzles solved</div>
+          </div>
+          <div class="progress-container">
+            <div class="progress-bar">
+              <div class="progress-fill" style="width: {{ item.percentage }}%"></div>
+            </div>
+            <span class="progress-percentage">{{ "%.0f"|format(item.percentage) }}%</span>
+          </div>
+        </div>
+      {% endfor %}
+    </div>
+  {% else %}
+    <p class="no-data">No issues available yet.</p>
+  {% endif %}
+</div>
+
+<div class="dashboard-activity">
+  <div class="activity-section">
+    <h3>Recent Solves</h3>
+    {% if stats.recent_correct %}
+      <div class="recent-solves">
+        {% for submission in stats.recent_correct %}
+          <div class="solve-item">
+            <div class="solve-info">
+              <strong>{{ submission.puzzle.title }}</strong>
+              {% if submission.puzzle.issue %}
+                <span class="issue-tag">{{ submission.puzzle.issue.title }}</span>
+              {% endif %}
+            </div>
+            <div class="solve-details">
+              <span class="answer">{{ submission.submitted_answer }}</span>
+              <span class="date" data-utc-datetime="{{ submission.submitted_at.strftime('%Y-%m-%d %H:%M:%S') }}" data-format="date">{{ submission.submitted_at.strftime('%m/%d/%Y') }}</span>
+            </div>
+          </div>
+        {% endfor %}
+      </div>
+    {% else %}
+      <p class="no-data">No solved puzzles yet. <a href="{{ url_for('puzzle.list_issues') }}">Start solving!</a></p>
+    {% endif %}
+  </div>
+
+  <div class="activity-section">
+    <h3>Recent Activity</h3>
+    {% if stats.recent_submissions %}
+      <div class="recent-activity">
+        {% for submission in stats.recent_submissions %}
+          <div class="activity-item {% if submission.is_correct %}correct{% else %}incorrect{% endif %}">
+            <div class="activity-info">
+              <strong>{{ submission.puzzle.title }}</strong>
+              <span class="attempt-result">
+                {% if submission.is_correct %}
+                  ✅ Solved
+                {% else %}
+                  ❌ Incorrect
+                {% endif %}
+              </span>
+            </div>
+            <div class="activity-details">
+              <span class="answer">{{ submission.submitted_answer }}</span>
+              <span class="date" data-utc-datetime="{{ submission.submitted_at.strftime('%Y-%m-%d %H:%M:%S') }}" data-format="short">{{ submission.submitted_at.strftime('%m/%d/%Y %I:%M %p') }}</span>
+            </div>
+          </div>
+        {% endfor %}
+      </div>
+    {% else %}
+      <p class="no-data">No activity yet. <a href="{{ url_for('puzzle.list_issues') }}">Start solving puzzles!</a></p>
+    {% endif %}
+  </div>
+</div>
+
+<div class="dashboard-actions">
+  <h3>Quick Actions</h3>
+  <div class="action-buttons">
+    <a href="{{ url_for('puzzle.list_issues') }}" class="action-btn primary">Browse Issues</a>
+    <a href="{{ url_for('puzzle.list_puzzles') }}" class="action-btn">All Puzzles</a>
+  </div>
+</div>
+
+{% endblock %}

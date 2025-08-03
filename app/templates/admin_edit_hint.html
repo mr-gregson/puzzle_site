@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+{% block content %}
+<h2>Edit Hint for: {{ hint.puzzle.title }}</h2>
+
+<form method="POST">
+    {{ form.hidden_tag() }}
+    
+    <div>
+        {{ form.puzzle_id.label }}
+        {{ form.puzzle_id() }}
+        {% if form.puzzle_id.errors %}
+            <div class="error">{{ form.puzzle_id.errors[0] }}</div>
+        {% endif %}
+    </div>
+    
+    <div>
+        {{ form.hint_text.label }}
+        {{ form.hint_text(rows=5) }}
+        {% if form.hint_text.errors %}
+            <div class="error">{{ form.hint_text.errors[0] }}</div>
+        {% endif %}
+    </div>
+    
+    <div>
+        {{ form.unlock_date.label }}
+        {{ form.unlock_date() }}
+        {% if form.unlock_date.errors %}
+            <div class="error">{{ form.unlock_date.errors[0] }}</div>
+        {% endif %}
+    </div>
+    
+    <div>
+        <input type="submit" value="Update Hint">
+        <a href="{{ url_for('admin.hint_list') }}">Cancel</a>
+    </div>
+</form>
+
+{% endblock %}

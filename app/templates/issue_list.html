@@ -1,13 +1,58 @@
 {% extends "base.html" %}
 {% block content %}
 <h2>Available Issues</h2>
-<ul>
-  {% for issue in issues %}
-    {% if issue.available_date <= current_time %}
-      <li><a href="{{ url_for('puzzle.issue_detail', issue_id=issue.id) }}">{{ issue.title }}</a></li>
+
+<div class="issues-grid">
+  {% for item in issue_progress %}
+    {% set issue = item.issue %}
+    {% if issue.available_date|to_utc <= current_time %}
+      <div class="issue-card">
+        <div class="issue-header">
+          <h3><a href="{{ url_for('puzzle.issue_detail', issue_id=issue.id) }}">{{ issue.title }}</a></h3>
+          <div class="issue-meta">
+            <span class="puzzle-count">{{ item.puzzle_count }} puzzles</span>
+            <span class="completion-badge {% if item.progress_percentage == 100 %}complete{% elif item.progress_percentage > 0 %}partial{% endif %}">
+              {{ item.solved_count }}/{{ item.puzzle_count }} solved
+            </span>
+          </div>
+        </div>
+        
+        <div class="progress-container">
+          <div class="progress-bar">
+            <div class="progress-fill" style="width: {{ item.progress_percentage }}%"></div>
+          </div>
+          <span class="progress-text">{{ "%.0f"|format(item.progress_percentage) }}% complete</span>
+        </div>
+        
+        {% if issue.description %}
+          <p class="issue-description">{{ issue.description[:100] }}{{ '...' if issue.description|length > 100 else '' }}</p>
+        {% endif %}
+        
+        {% if issue.pdf_filename %}
+          <div class="issue-download">
+            <a href="{{ url_for('static', filename='pdfs/' + issue.pdf_filename) }}" target="_blank" download>
+              📄 Download PDF
+            </a>
+          </div>
+        {% endif %}
+      </div>
     {% else %}
-      <li><em>{{ issue.title }} available {{ issue.available_date.strftime('%B %d, %Y') }}</em></li>
+      <div class="issue-card locked">
+        <div class="issue-header">
+          <h3>{{ issue.title }}</h3>
+          <div class="issue-meta">
+            <span class="puzzle-count">{{ item.puzzle_count }} puzzles</span>
+            <span class="locked-badge">🔒 Locked</span>
+          </div>
+        </div>
+        <p class="unlock-date">Available <span data-utc-datetime="{{ issue.available_date.strftime('%Y-%m-%d %H:%M:%S') }}" data-format="full">{{ issue.available_date.strftime('%B %d, %Y') }}</span></p>
+      </div>
     {% endif %}
   {% endfor %}
-</ul>
+</div>
+
+{% if not issue_progress %}
+  <p>No issues available yet.</p>
+{% endif %}
+
 {% endblock %}

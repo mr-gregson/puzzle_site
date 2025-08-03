@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+{% block content %}
+<h2>Edit Issue: {{ issue.title }}</h2>
+
+<form method="POST">
+    {{ form.hidden_tag() }}
+    
+    <div>
+        {{ form.title.label }}
+        {{ form.title() }}
+        {% if form.title.errors %}
+            <div class="error">{{ form.title.errors[0] }}</div>
+        {% endif %}
+    </div>
+    
+    <div>
+        {{ form.description.label }}
+        {{ form.description(rows=5) }}
+        {% if form.description.errors %}
+            <div class="error">{{ form.description.errors[0] }}</div>
+        {% endif %}
+    </div>
+    
+    <div>
+        {{ form.pdf_filename.label }}
+        {{ form.pdf_filename() }}
+        {% if form.pdf_filename.errors %}
+            <div class="error">{{ form.pdf_filename.errors[0] }}</div>
+        {% endif %}
+    </div>
+    
+    <div>
+        {{ form.available_date.label }}
+        {{ form.available_date() }}
+        {% if form.available_date.errors %}
+            <div class="error">{{ form.available_date.errors[0] }}</div>
+        {% endif %}
+    </div>
+    
+    <div>
+        <input type="submit" value="Update Issue">
+        <a href="{{ url_for('admin.issue_list') }}">Cancel</a>
+    </div>
+</form>
+
+{% endblock %}
