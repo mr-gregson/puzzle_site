@@ -94,7 +94,7 @@
   <h3>Hints</h3>
   
   {% if unlocked_hints %}
-    <div class="hints-container">
+    <div>
       {% for hint in unlocked_hints %}
         <div class="hint-item">
           <button class="hint-toggle" type="button" onclick="toggleHint('{{ hint.id }}')">

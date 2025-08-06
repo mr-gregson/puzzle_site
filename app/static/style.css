@@ -664,9 +664,6 @@ form input[type="submit"]:hover, form button:hover {
     margin-bottom: 20px;
 }
 
-.hints-container {
-    space-y: 10px;
-}
 
 .hint-item {
     border: 1px solid #ddd;
