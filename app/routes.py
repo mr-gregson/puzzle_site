@@ -7,6 +7,7 @@ from .forms import PuzzleForm, HintForm, IssueForm
 from . import db
 from .admin_utils import admin_required
 from app.puzzles import normalize_answer
+from .email import notify_all_users_new_issue
 
 admin_bp = Blueprint('admin', __name__, url_prefix='/admin')
 
@@ -46,7 +47,18 @@ def add_issue():
         )
         db.session.add(new_issue)
         db.session.commit()
-        flash('Issue created successfully!')
+        
+        # Send email notifications to users who want them
+        try:
+            if new_issue.available_date <= datetime.now(timezone.utc):
+                notify_all_users_new_issue(new_issue)
+                flash('Issue created successfully and notifications sent!')
+            else:
+                flash('Issue created successfully! Notifications will be sent when the issue becomes available.')
+        except Exception as e:
+            flash('Issue created successfully, but failed to send some notifications.')
+            print(f"Failed to send issue notifications: {e}")
+        
         return redirect(url_for('admin.dashboard'))
 
     return render_template('admin_add_puzzle.html', form=form)

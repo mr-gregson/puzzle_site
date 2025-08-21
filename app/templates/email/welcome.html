@@ -1,0 +1,26 @@
+{% extends "email/base.html" %}
+
+{% block title %}Welcome to Puzzle Site!{% endblock %}
+{% block header %}Welcome to Puzzle Site!{% endblock %}
+
+{% block content %}
+<h2>Welcome, {{ user.username }}!</h2>
+
+<p>Thank you for joining Puzzle Site! Your account has been successfully created.</p>
+
+<p>Here's what you can do now:</p>
+<ul>
+    <li>Explore available puzzle issues</li>
+    <li>Solve challenging puzzles</li>
+    <li>Track your progress</li>
+    <li>Get hints when you need them</li>
+</ul>
+
+<a href="{{ url_for('puzzle.issue_list', _external=True) }}" class="button">
+    Start Solving Puzzles
+</a>
+
+<p>We'll send you notifications when new issues and hints become available. You can manage your notification preferences in your account settings.</p>
+
+<p>Happy puzzling!</p>
+{% endblock %}

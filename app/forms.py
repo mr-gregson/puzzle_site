@@ -1,5 +1,5 @@
 from flask_wtf import FlaskForm
-from wtforms import StringField, PasswordField, SubmitField, TextAreaField, SelectField, HiddenField
+from wtforms import StringField, PasswordField, SubmitField, TextAreaField, SelectField, HiddenField, BooleanField
 from wtforms.fields import DateField, TextAreaField, IntegerField, DateTimeLocalField
 
 from wtforms.validators import DataRequired, Email, EqualTo, Length
@@ -40,4 +40,20 @@ class HintForm(FlaskForm):
     hint_text = TextAreaField('Hint Text', validators=[DataRequired()])
     unlock_date = DateField('Unlock Date', validators=[DataRequired()])
     submit = SubmitField('Add Hint')
+
+class RequestPasswordResetForm(FlaskForm):
+    email = StringField('Email', validators=[DataRequired(), Email()])
+    submit = SubmitField('Request Password Reset')
+
+class ResetPasswordForm(FlaskForm):
+    password = PasswordField('New Password', validators=[DataRequired(), Length(min=6)])
+    confirm_password = PasswordField('Confirm Password', validators=[DataRequired(), EqualTo('password')])
+    submit = SubmitField('Reset Password')
+
+class UserPreferencesForm(FlaskForm):
+    display_name = StringField('Display Name', validators=[DataRequired(), Length(min=1, max=150)])
+    email_notifications = BooleanField('Enable email notifications')
+    notify_new_issues = BooleanField('Notify me when new issues become available')
+    notify_new_hints = BooleanField('Notify me when new hints are unlocked for puzzles I\'ve attempted')
+    submit = SubmitField('Update Preferences')
 

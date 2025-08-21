@@ -1,0 +1,59 @@
+# Docker Compose for local development and testing
+# Production deployment should use orchestration tools (Kubernetes, Docker Swarm)
+version: '3.8'
+
+services:
+  web:
+    build: .
+    ports:
+      - "8000:8000"
+    environment:
+      - FLASK_ENV=production
+      - DATABASE_URL=postgresql://puzzleuser:puzzlepass@db:5432/puzzlesite
+      - SECRET_KEY=${SECRET_KEY:-please-change-this-secret-key}
+      - MAIL_SERVER=${MAIL_SERVER:-smtp.gmail.com}
+      - MAIL_PORT=${MAIL_PORT:-587}
+      - MAIL_USE_TLS=${MAIL_USE_TLS:-true}
+      - MAIL_USERNAME=${MAIL_USERNAME}
+      - MAIL_PASSWORD=${MAIL_PASSWORD}
+      - MAIL_DEFAULT_SENDER=${MAIL_DEFAULT_SENDER}
+      - PUZZLE_SITE_ADMIN=${PUZZLE_SITE_ADMIN}
+    depends_on:
+      db:
+        condition: service_healthy
+    volumes:
+      - puzzle_pdfs:/app/app/static/pdfs
+      - puzzle_logs:/app/logs
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  db:
+    image: postgres:15-alpine
+    environment:
+      POSTGRES_DB: puzzlesite
+      POSTGRES_USER: puzzleuser
+      POSTGRES_PASSWORD: puzzlepass
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"  # Remove in production
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U puzzleuser -d puzzlesite"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  postgres_data:
+  puzzle_pdfs:
+  puzzle_logs:
+
+networks:
+  default:
+    name: puzzle_network

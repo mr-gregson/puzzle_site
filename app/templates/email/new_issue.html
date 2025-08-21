@@ -1,0 +1,25 @@
+{% extends "email/base.html" %}
+
+{% block title %}New Issue Available - Puzzle Site{% endblock %}
+{% block header %}New Issue Available!{% endblock %}
+
+{% block content %}
+<h2>Issue {{ issue.number }}: {{ issue.title }}</h2>
+
+<p>A new puzzle issue is now available for you to tackle!</p>
+
+{% if issue.description %}
+<p><strong>Description:</strong><br>
+{{ issue.description }}</p>
+{% endif %}
+
+<p><strong>Available since:</strong> {{ issue.available_date.strftime('%B %d, %Y at %I:%M %p UTC') }}</p>
+
+<p><strong>Number of puzzles:</strong> {{ issue.puzzles|length }}</p>
+
+<a href="{{ url_for('puzzle.issue_detail', id=issue.id, _external=True) }}" class="button">
+    View Issue {{ issue.number }}
+</a>
+
+<p>Ready to solve some puzzles? Click the link above to get started!</p>
+{% endblock %}

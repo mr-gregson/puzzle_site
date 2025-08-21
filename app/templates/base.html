@@ -96,6 +96,7 @@ document.addEventListener('DOMContentLoaded', convertDatesToLocal);
         <div class="user-profile">
           <div class="user-info">
             <span class="user-name">{{ current_user.username }}</span>
+            <a href="{{ url_for('auth.preferences') }}" class="preferences-link">Preferences</a>
             <a href="{{ url_for('auth.logout') }}" class="logout-link">Logout</a>
           </div>
         </div>

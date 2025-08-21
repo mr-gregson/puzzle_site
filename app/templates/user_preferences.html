@@ -1,0 +1,68 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header">
+                    <h3>User Preferences</h3>
+                </div>
+                <div class="card-body">
+                    <form method="POST">
+                        {{ form.hidden_tag() }}
+                        
+                        <div class="mb-3">
+                            {{ form.display_name.label(class="form-label") }}
+                            {{ form.display_name(class="form-control") }}
+                            {% if form.display_name.errors %}
+                                <div class="text-danger">
+                                    {% for error in form.display_name.errors %}
+                                        <small>{{ error }}</small>
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="mb-3">
+                            <h5>Email Notifications</h5>
+                            <div class="form-check mb-2">
+                                {{ form.email_notifications(class="form-check-input") }}
+                                {{ form.email_notifications.label(class="form-check-label") }}
+                            </div>
+                            <small class="text-muted">Master switch for all email notifications</small>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <div class="form-check mb-2">
+                                {{ form.notify_new_issues(class="form-check-input") }}
+                                {{ form.notify_new_issues.label(class="form-check-label") }}
+                            </div>
+                            <small class="text-muted">Get notified when new puzzle issues are released</small>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <div class="form-check mb-2">
+                                {{ form.notify_new_hints(class="form-check-input") }}
+                                {{ form.notify_new_hints.label(class="form-check-label") }}
+                            </div>
+                            <small class="text-muted">Get notified when hints become available for puzzles you've attempted</small>
+                        </div>
+                        
+                        <div class="d-grid">
+                            {{ form.submit(class="btn btn-primary") }}
+                        </div>
+                    </form>
+                    
+                    <div class="mt-4">
+                        <h5>Account Information</h5>
+                        <p><strong>Username:</strong> {{ current_user.username }}</p>
+                        <p><strong>Email:</strong> {{ current_user.email }}</p>
+                        <p><strong>Admin:</strong> {{ "Yes" if current_user.is_admin else "No" }}</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
