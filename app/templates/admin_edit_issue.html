@@ -30,6 +30,14 @@
     </div>
     
     <div>
+        {{ form.answer_pdf_filename.label }}
+        {{ form.answer_pdf_filename() }}
+        {% if form.answer_pdf_filename.errors %}
+            <div class="error">{{ form.answer_pdf_filename.errors[0] }}</div>
+        {% endif %}
+    </div>
+    
+    <div>
         {{ form.available_date.label }}
         {{ form.available_date() }}
         {% if form.available_date.errors %}

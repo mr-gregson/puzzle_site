@@ -26,6 +26,10 @@
             <p>Correct Submissions</p>
         </div>
         <div class="stat-item">
+            <h4>{{ stats.total_errata }}</h4>
+            <p>Total Errata</p>
+        </div>
+        <div class="stat-item">
             <h4>{{ "%.1f"|format((stats.correct_submissions / stats.total_submissions * 100) if stats.total_submissions > 0 else 0) }}%</h4>
             <p>Success Rate</p>
         </div>
@@ -39,9 +43,11 @@
         <a href="{{ url_for('admin.puzzle_list') }}" class="action-btn">Manage Puzzles</a>
         <a href="{{ url_for('admin.issue_list') }}" class="action-btn">Manage Issues</a>
         <a href="{{ url_for('admin.hint_list') }}" class="action-btn">Manage Hints</a>
+        <a href="{{ url_for('admin.errata_list') }}" class="action-btn">Manage Errata</a>
         <a href="{{ url_for('admin.add_issue') }}" class="action-btn">Create New Issue</a>
         <a href="{{ url_for('admin.add_puzzle') }}" class="action-btn">Create New Puzzle</a>
         <a href="{{ url_for('admin.add_hint') }}" class="action-btn">Add New Hint</a>
+        <a href="{{ url_for('admin.add_erratum') }}" class="action-btn">Add New Erratum</a>
     </div>
 </div>
 

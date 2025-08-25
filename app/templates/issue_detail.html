@@ -33,13 +33,22 @@
   </div>
 {% endif %}
 
-{% if issue.pdf_filename %}
-  <div class="issue-download">
-    <p>
-      📄 <a href="{{ url_for('static', filename='pdfs/' + issue.pdf_filename) }}" target="_blank" download>
-        Download this issue as a PDF
-      </a>
-    </p>
+{% if issue.pdf_filename or issue.answer_pdf_filename %}
+  <div class="issue-downloads">
+    {% if issue.pdf_filename %}
+      <p>
+        📄 <a href="{{ url_for('static', filename='pdfs/' + issue.pdf_filename) }}" target="_blank" download>
+          Download this issue as a PDF
+        </a>
+      </p>
+    {% endif %}
+    {% if issue.answer_pdf_filename %}
+      <p>
+        📋 <a href="{{ url_for('static', filename='pdfs/' + issue.answer_pdf_filename) }}" target="_blank" download>
+          Download answer key (PDF)
+        </a>
+      </p>
+    {% endif %}
   </div>
 {% endif %}
 

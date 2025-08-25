@@ -12,7 +12,8 @@
         <th>ID</th>
         <th>Title</th>
         <th>Available Date</th>
-        <th>PDF File</th>
+        <th>Issue PDF</th>
+        <th>Answer PDF</th>
         <th>Puzzles Count</th>
         <th>Actions</th>
     </tr>
@@ -22,6 +23,7 @@
         <td>{{ issue.title }}</td>
         <td><span data-utc-datetime="{{ issue.available_date.strftime('%Y-%m-%d %H:%M:%S') }}" data-format="short">{{ issue.available_date.strftime('%Y-%m-%d %H:%M') }}</span></td>
         <td>{{ issue.pdf_filename if issue.pdf_filename else 'None' }}</td>
+        <td>{{ issue.answer_pdf_filename if issue.answer_pdf_filename else 'None' }}</td>
         <td>{{ issue.puzzles|length }}</td>
         <td>
             <a href="{{ url_for('admin.edit_issue', issue_id=issue.id) }}">Edit</a> |

@@ -1,6 +1,6 @@
 from flask import Blueprint, render_template, redirect, url_for, request, flash
 from flask_login import login_required, current_user
-from .models import Puzzle, Submission, Hint, Issue
+from .models import Puzzle, Submission, Hint, Issue, Erratum
 from .forms import AnswerForm
 from . import db
 from datetime import date, datetime, timezone
@@ -175,3 +175,8 @@ def user_dashboard():
             })
     
     return render_template('user_dashboard.html', stats=user_stats)
+
+@puzzle_bp.route('/errata')
+def errata_list():
+    active_errata = Erratum.query.filter_by(is_active=True).order_by(Erratum.created_at.desc()).all()
+    return render_template('errata_list.html', errata=active_errata)

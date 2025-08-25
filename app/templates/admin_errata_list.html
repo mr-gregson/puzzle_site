@@ -1,0 +1,66 @@
+{% extends "base.html" %}
+
+{% block title %}Admin - Errata - Puzzle Site{% endblock %}
+
+{% block content %}
+<h1>Admin: Manage Errata</h1>
+
+<div class="admin-actions">
+    <a href="{{ url_for('admin.add_erratum') }}" class="btn btn-primary">Add New Erratum</a>
+    <a href="{{ url_for('admin.dashboard') }}" class="btn btn-secondary">Back to Dashboard</a>
+</div>
+
+{% if errata %}
+    <table class="admin-table">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Title</th>
+                <th>Related Puzzle</th>
+                <th>Related Issue</th>
+                <th>Status</th>
+                <th>Created</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for erratum in errata %}
+            <tr>
+                <td>{{ erratum.id }}</td>
+                <td>{{ erratum.title }}</td>
+                <td>
+                    {% if erratum.puzzle_id %}
+                        <a href="{{ url_for('puzzle.puzzle_detail', puzzle_id=erratum.puzzle_id) }}">{{ erratum.puzzle.title }}</a>
+                    {% else %}
+                        -
+                    {% endif %}
+                </td>
+                <td>
+                    {% if erratum.issue_id %}
+                        <a href="{{ url_for('puzzle.issue_detail', issue_id=erratum.issue_id) }}">{{ erratum.issue.title }}</a>
+                    {% else %}
+                        -
+                    {% endif %}
+                </td>
+                <td>
+                    {% if erratum.is_active %}
+                        <span class="status-active">Active</span>
+                    {% else %}
+                        <span class="status-inactive">Inactive</span>
+                    {% endif %}
+                </td>
+                <td><span data-utc-datetime="{{ erratum.created_at.isoformat() }}" data-format="short">{{ erratum.created_at.strftime('%Y-%m-%d %H:%M UTC') }}</span></td>
+                <td class="actions">
+                    <a href="{{ url_for('admin.edit_erratum', erratum_id=erratum.id) }}" class="btn btn-small">Edit</a>
+                    <a href="{{ url_for('admin.delete_erratum', erratum_id=erratum.id) }}" 
+                       class="btn btn-danger btn-small" 
+                       onclick="return confirm('Are you sure you want to delete this erratum?')">Delete</a>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+{% else %}
+    <p>No errata found.</p>
+{% endif %}
+{% endblock %}

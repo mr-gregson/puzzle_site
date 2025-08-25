@@ -25,6 +25,7 @@ class IssueForm(FlaskForm):
     title = StringField('Issue Title', validators=[DataRequired()])
     description = TextAreaField('Description')
     pdf_filename = StringField('PDF Filename (in static/pdfs/)')
+    answer_pdf_filename = StringField('Answer PDF Filename (in static/pdfs/)')
     available_date = DateTimeLocalField('Available Date & Time (UTC)', format='%Y-%m-%dT%H:%M', validators=[DataRequired()])
     submit = SubmitField('Create Issue')
 
@@ -56,4 +57,12 @@ class UserPreferencesForm(FlaskForm):
     notify_new_issues = BooleanField('Notify me when new issues become available')
     notify_new_hints = BooleanField('Notify me when new hints are unlocked for puzzles I\'ve attempted')
     submit = SubmitField('Update Preferences')
+
+class ErrataForm(FlaskForm):
+    title = StringField('Erratum Title', validators=[DataRequired()])
+    description = TextAreaField('Erratum Description', validators=[DataRequired()])
+    puzzle_id = SelectField('Related Puzzle (optional)', coerce=int)
+    issue_id = SelectField('Related Issue (optional)', coerce=int) 
+    is_active = BooleanField('Active', default=True)
+    submit = SubmitField('Save Erratum')
 

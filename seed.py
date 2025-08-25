@@ -15,14 +15,14 @@ with app.app_context():
         username="user1",
         display_name="Alice",
         email="alice@example.com",
-        password=generate_password_hash("password"),
+        password_hash=generate_password_hash("password"),
         is_admin=False
     )
     admin = User(
         username="admin",
         display_name="Admin",
         email="admin@example.com",
-        password=generate_password_hash("adminpass"),
+        password_hash=generate_password_hash("adminpass"),
         is_admin=True
     )
 

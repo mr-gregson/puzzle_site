@@ -2,8 +2,8 @@ from flask import Blueprint, request, render_template, redirect, url_for, flash
 from werkzeug.security import generate_password_hash
 from flask_login import current_user, login_required
 from datetime import datetime, timezone
-from .models import User, Puzzle, Hint, Issue, Submission
-from .forms import PuzzleForm, HintForm, IssueForm
+from .models import User, Puzzle, Hint, Issue, Submission, Erratum
+from .forms import PuzzleForm, HintForm, IssueForm, ErrataForm
 from . import db
 from .admin_utils import admin_required
 from app.puzzles import normalize_answer
@@ -43,6 +43,7 @@ def add_issue():
             title=form.title.data,
             description=form.description.data,
             pdf_filename=form.pdf_filename.data or None,
+            answer_pdf_filename=form.answer_pdf_filename.data or None,
             available_date=form.available_date.data
         )
         db.session.add(new_issue)
@@ -197,6 +198,7 @@ def edit_issue(issue_id):
         issue.title = form.title.data
         issue.description = form.description.data
         issue.pdf_filename = form.pdf_filename.data or None
+        issue.answer_pdf_filename = form.answer_pdf_filename.data or None
         issue.available_date = form.available_date.data
         
         db.session.commit()
@@ -224,6 +226,84 @@ def edit_hint(hint_id):
     
     return render_template('admin_edit_hint.html', form=form, hint=hint)
 
+@admin_bp.route('/errata')
+@login_required
+@admin_required
+def errata_list():
+    errata = Erratum.query.order_by(Erratum.created_at.desc()).all()
+    return render_template('admin_errata_list.html', errata=errata)
+
+@admin_bp.route('/add_erratum', methods=['GET', 'POST'])
+@login_required
+@admin_required
+def add_erratum():
+    form = ErrataForm()
+    form.puzzle_id.choices = [(0, '-- No Puzzle --')] + [
+        (p.id, p.title) for p in Puzzle.query.order_by(Puzzle.title).all()
+    ]
+    form.issue_id.choices = [(0, '-- No Issue --')] + [
+        (i.id, i.title) for i in Issue.query.order_by(Issue.title).all()
+    ]
+
+    if form.validate_on_submit():
+        puzzle_id = form.puzzle_id.data if form.puzzle_id.data != 0 else None
+        issue_id = form.issue_id.data if form.issue_id.data != 0 else None
+        
+        new_erratum = Erratum(
+            title=form.title.data,
+            description=form.description.data,
+            puzzle_id=puzzle_id,
+            issue_id=issue_id,
+            is_active=form.is_active.data
+        )
+        db.session.add(new_erratum)
+        db.session.commit()
+        flash('Erratum created successfully!')
+        return redirect(url_for('admin.errata_list'))
+
+    return render_template('admin_add_erratum.html', form=form)
+
+@admin_bp.route('/edit_erratum/<int:erratum_id>', methods=['GET', 'POST'])
+@login_required
+@admin_required
+def edit_erratum(erratum_id):
+    erratum = Erratum.query.get_or_404(erratum_id)
+    form = ErrataForm(obj=erratum)
+    
+    form.puzzle_id.choices = [(0, '-- No Puzzle --')] + [
+        (p.id, p.title) for p in Puzzle.query.order_by(Puzzle.title).all()
+    ]
+    form.issue_id.choices = [(0, '-- No Issue --')] + [
+        (i.id, i.title) for i in Issue.query.order_by(Issue.title).all()
+    ]
+    
+    if request.method == 'GET':
+        form.puzzle_id.data = erratum.puzzle_id if erratum.puzzle_id else 0
+        form.issue_id.data = erratum.issue_id if erratum.issue_id else 0
+    
+    if form.validate_on_submit():
+        erratum.title = form.title.data
+        erratum.description = form.description.data
+        erratum.puzzle_id = form.puzzle_id.data if form.puzzle_id.data != 0 else None
+        erratum.issue_id = form.issue_id.data if form.issue_id.data != 0 else None
+        erratum.is_active = form.is_active.data
+        
+        db.session.commit()
+        flash('Erratum updated successfully!')
+        return redirect(url_for('admin.errata_list'))
+    
+    return render_template('admin_edit_erratum.html', form=form, erratum=erratum)
+
+@admin_bp.route('/delete_erratum/<int:erratum_id>')
+@login_required
+@admin_required
+def delete_erratum(erratum_id):
+    erratum = Erratum.query.get_or_404(erratum_id)
+    db.session.delete(erratum)
+    db.session.commit()
+    flash("Erratum deleted successfully.")
+    return redirect(url_for('admin.errata_list'))
+
 @admin_bp.route('/')
 @login_required
 @admin_required
@@ -234,6 +314,7 @@ def dashboard():
         'total_issues': Issue.query.count(),
         'total_submissions': Submission.query.count(),
         'correct_submissions': Submission.query.filter_by(is_correct=True).count(),
+        'total_errata': Erratum.query.count(),
         'recent_users': User.query.order_by(User.id.desc()).limit(5).all(),
         'recent_submissions': Submission.query.order_by(Submission.submitted_at.desc()).limit(5).all()
     }

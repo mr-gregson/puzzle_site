@@ -1,0 +1,34 @@
+{% extends "base.html" %}
+
+{% block title %}Errata - Puzzle Site{% endblock %}
+
+{% block content %}
+<h1>Errata</h1>
+
+{% if errata %}
+    <p>Corrections and updates to puzzles and issues:</p>
+    
+    {% for erratum in errata %}
+    <div class="erratum-item">
+        <h3>{{ erratum.title }}</h3>
+        <div class="erratum-meta">
+            <small>
+                Published: <span data-utc-datetime="{{ erratum.created_at.isoformat() }}" data-format="short">{{ erratum.created_at.strftime('%Y-%m-%d %H:%M UTC') }}</span>
+                {% if erratum.puzzle_id %}
+                | Related to: <a href="{{ url_for('puzzle.puzzle_detail', puzzle_id=erratum.puzzle_id) }}">{{ erratum.puzzle.title }}</a>
+                {% endif %}
+                {% if erratum.issue_id %}
+                | Related to: <a href="{{ url_for('puzzle.issue_detail', issue_id=erratum.issue_id) }}">{{ erratum.issue.title }}</a>
+                {% endif %}
+            </small>
+        </div>
+        <div class="erratum-description">
+            {{ erratum.description | replace('\n', '<br>') | safe }}
+        </div>
+    </div>
+    <hr>
+    {% endfor %}
+{% else %}
+    <p>No errata at this time.</p>
+{% endif %}
+{% endblock %}

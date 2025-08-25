@@ -65,7 +65,17 @@ class Issue(db.Model):
     title = db.Column(db.String(200), nullable=False)
     description = db.Column(db.Text, nullable=True)
     pdf_filename = db.Column(db.String(200), nullable=True)
+    answer_pdf_filename = db.Column(db.String(200), nullable=True)
     available_date = db.Column(db.DateTime(timezone=True), nullable=False, default=lambda: datetime.now(timezone.utc))
 
     puzzles = db.relationship('Puzzle', backref='issue', lazy=True)
+
+class Erratum(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    title = db.Column(db.String(200), nullable=False)
+    description = db.Column(db.Text, nullable=False)
+    puzzle_id = db.Column(db.Integer, db.ForeignKey('puzzle.id'), nullable=True)
+    issue_id = db.Column(db.Integer, db.ForeignKey('issue.id'), nullable=True)
+    created_at = db.Column(db.DateTime, default=lambda: datetime.now(timezone.utc))
+    is_active = db.Column(db.Boolean, default=True)
 
