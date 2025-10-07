@@ -30,7 +30,8 @@ def create_app():
         # Security settings
         WTF_CSRF_ENABLED=True,
         WTF_CSRF_TIME_LIMIT=None,
-        SESSION_COOKIE_SECURE=os.environ.get('FLASK_ENV') == 'production',
+        SESSION_COOKIE_SECURE=False,
+        REMEMBER_COOKIE_SECURE=False,
         SESSION_COOKIE_HTTPONLY=True,
         SESSION_COOKIE_SAMESITE='Lax',
         # Email configuration
@@ -47,11 +48,13 @@ def create_app():
 
     db.init_app(app)
     login_manager.init_app(app)
+    login_manager.login_view = 'auth.login'
     mail.init_app(app)
 
 
     @login_manager.user_loader
     def load_user(user_id):
+        from .models import User
         return User.query.get(int(user_id))
 
     from .models import User, Issue, Puzzle, Submission
