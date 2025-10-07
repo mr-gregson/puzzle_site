@@ -42,6 +42,8 @@ def create_app():
         MAIL_PASSWORD=os.environ.get('MAIL_PASSWORD'),
         MAIL_DEFAULT_SENDER=os.environ.get('MAIL_DEFAULT_SENDER'),
         PUZZLE_SITE_ADMIN=os.environ.get('PUZZLE_SITE_ADMIN') or 'admin@example.com',
+        MAIL_PROVIDER=os.environ.get('MAIL_PROVIDER', 'smtp'),  # 'smtp' or 'sendgrid'
+        SENDGRID_API_KEY=os.environ.get('SENDGRID_API_KEY'),
         # Logging
         LOG_LEVEL=os.environ.get('LOG_LEVEL', 'INFO'),
     )

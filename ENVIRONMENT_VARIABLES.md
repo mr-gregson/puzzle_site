@@ -18,13 +18,13 @@ This document provides a complete reference for all environment variables used b
 ### Email Configuration (Required for user registration)
 | Variable | Required | Default | Description |
 |----------|----------|---------|-------------|
-| `MAIL_SERVER` | **Yes** | - | SMTP server hostname (e.g., `smtp.gmail.com`) |
-| `MAIL_PORT` | **Yes** | - | SMTP server port (usually `587` for TLS, `465` for SSL, `25` for plain) |
-| `MAIL_USE_TLS` | **Yes** | - | Enable TLS encryption (`true` or `false`) |
+| `MAIL_SERVER` | **Yes** | - | smtp.sendgrid.net |
+| `MAIL_PORT` | **Yes** | - | `587` SMTP server port (usually `587` for TLS, `465` for SSL, `25` for plain) |
+| `MAIL_USE_TLS` | **Yes** | - | true |
 | `MAIL_USERNAME` | **Yes** | - | SMTP authentication username |
 | `MAIL_PASSWORD` | **Yes** | - | SMTP authentication password (use App Password for Gmail) |
 | `MAIL_DEFAULT_SENDER` | **Yes** | - | Default sender email address |
-| `PUZZLE_SITE_ADMIN` | **Yes** | - | Admin email for system notifications |
+| `PUZZLE_SITE_ADMIN` | **Yes** | - | froot.magazine@utschools.ca |
 
 ## ⚙️ Optional Variables
 

@@ -3,6 +3,12 @@ from flask import current_app, render_template
 from flask_mail import Message
 from . import mail, db
 
+try:
+    from sendgrid import SendGridAPIClient
+    from sendgrid.helpers.mail import Mail as SGMail
+except Exception:
+    SendGridAPIClient = None
+    SGMail = None
 
 def send_async_email(app, msg):
     """Send email asynchronously in background thread"""
@@ -10,21 +16,44 @@ def send_async_email(app, msg):
         mail.send(msg)
 
 
-def send_email(to, subject, template, **kwargs):
-    """Send email with HTML template"""
-    app = current_app._get_current_object()
-    msg = Message(
-        subject=f'[Puzzle Site] {subject}',
-        recipients=[to] if isinstance(to, str) else to,
-        html=render_template(template, **kwargs),
-        sender=app.config['MAIL_DEFAULT_SENDER']
-    )
-    
-    # Send email in background thread to avoid blocking the request
-    thr = Thread(target=send_async_email, args=[app, msg])
-    thr.start()
-    return thr
+def send_async_sendgrid(app, subject, to, html):
+    """Send email asynchronously via SendGrid Web API"""
+    with app.app_context():
+        api_key = app.config.get('SENDGRID_API_KEY')
+        if not api_key or SendGridAPIClient is None:
+            current_app.logger.error('SendGrid API not available or API key missing')
+            return
+        client = SendGridAPIClient(api_key)
+        from_email = app.config['MAIL_DEFAULT_SENDER']
+        to_list = to if isinstance(to, list) else [to]
+        sg_msg = SGMail(
+            from_email=from_email,
+            to_emails=to_list,
+            subject=f'[Puzzle Site] {subject}',
+            html_content=html,
+        )
+        client.send(sg_msg)
 
+def send_email(to, subject, template, **kwargs):
+    """Send email using selected provider"""
+    app = current_app._get_current_object()
+    html = render_template(template, **kwargs)
+    provider = app.config.get('MAIL_PROVIDER', 'smtp').lower()
+
+    if provider == 'sendgrid':
+        thr = Thread(target=send_async_sendgrid, args=[app, subject, to, html])
+        thr.start()
+        return thr
+    else:
+        msg = Message(
+            subject=f'[Puzzle Site] {subject}',
+            recipients=[to] if isinstance(to, str) else to,
+            html=html,
+            sender=app.config['MAIL_DEFAULT_SENDER']
+        )
+        thr = Thread(target=send_async_email, args=[app, msg])
+        thr.start()
+        return thr
 
 def send_welcome_email(user):
     """Send welcome email to new users"""
