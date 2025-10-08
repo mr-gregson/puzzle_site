@@ -62,7 +62,7 @@ def add_issue():
         
         return redirect(url_for('admin.dashboard'))
 
-    return render_template('admin_add_puzzle.html', form=form)
+    return render_template('admin_add_issue.html', form=form)
 
 @admin_bp.route('/add_puzzle', methods=['GET', 'POST'])
 @login_required
