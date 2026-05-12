@@ -22,6 +22,11 @@ def register_error_handlers(app):
     def forbidden_error(error):
         current_app.logger.warning(f'403 error: {error}')
         return render_template('errors/404.html'), 403  # Don't reveal 403s exist
+
+    @app.errorhandler(413)
+    def request_entity_too_large(error):
+        current_app.logger.warning(f'413 error: {error}')
+        return render_template('errors/500.html'), 413
     
     @app.errorhandler(CSRFError)
     def handle_csrf_error(e):

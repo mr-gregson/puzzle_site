@@ -27,6 +27,7 @@ def create_app():
         SECRET_KEY=os.environ.get('SECRET_KEY') or 'dev-fallback-change-in-production',
         SQLALCHEMY_DATABASE_URI=os.environ.get('DATABASE_URL') or 'sqlite:///puzzle_site.db',
         SQLALCHEMY_TRACK_MODIFICATIONS=False,
+        MAX_CONTENT_LENGTH=int(os.environ.get('MAX_UPLOAD_SIZE_MB', 20)) * 1024 * 1024,
         # Security settings
         WTF_CSRF_ENABLED=True,
         WTF_CSRF_TIME_LIMIT=None,
@@ -46,6 +47,11 @@ def create_app():
         SENDGRID_API_KEY=os.environ.get('SENDGRID_API_KEY'),
         # Logging
         LOG_LEVEL=os.environ.get('LOG_LEVEL', 'INFO'),
+    )
+
+    app.config['PDF_UPLOAD_FOLDER'] = (
+        os.environ.get('PDF_UPLOAD_FOLDER')
+        or os.path.join(app.root_path, 'static', 'pdfs')
     )
 
     db.init_app(app)

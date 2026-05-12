@@ -2,7 +2,7 @@
 {% block content %}
 <h2>Edit Issue: {{ issue.title }}</h2>
 
-<form method="POST">
+<form method="POST" enctype="multipart/form-data">
     {{ form.hidden_tag() }}
     
     <div>
@@ -24,16 +24,42 @@
     <div>
         {{ form.pdf_filename.label }}
         {{ form.pdf_filename() }}
+        {% if issue.pdf_filename %}
+            <div>
+                Current file: <a href="{{ url_for('static', filename='pdfs/' + issue.pdf_filename) }}" target="_blank">{{ issue.pdf_filename }}</a>
+            </div>
+        {% endif %}
         {% if form.pdf_filename.errors %}
             <div class="error">{{ form.pdf_filename.errors[0] }}</div>
+        {% endif %}
+    </div>
+
+    <div>
+        {{ form.pdf_upload.label }}
+        {{ form.pdf_upload() }}
+        {% if form.pdf_upload.errors %}
+            <div class="error">{{ form.pdf_upload.errors[0] }}</div>
         {% endif %}
     </div>
     
     <div>
         {{ form.answer_pdf_filename.label }}
         {{ form.answer_pdf_filename() }}
+        {% if issue.answer_pdf_filename %}
+            <div>
+                Current file: <a href="{{ url_for('static', filename='pdfs/' + issue.answer_pdf_filename) }}" target="_blank">{{ issue.answer_pdf_filename }}</a>
+            </div>
+        {% endif %}
         {% if form.answer_pdf_filename.errors %}
             <div class="error">{{ form.answer_pdf_filename.errors[0] }}</div>
+        {% endif %}
+    </div>
+
+    <div>
+        {{ form.answer_pdf_upload.label }}
+        {{ form.answer_pdf_upload() }}
+        {% if form.answer_pdf_upload.errors %}
+            <div class="error">{{ form.answer_pdf_upload.errors[0] }}</div>
         {% endif %}
     </div>
     

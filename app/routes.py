@@ -1,8 +1,11 @@
 import csv
 import io
+import os
+import uuid
 
-from flask import Blueprint, Response, request, render_template, redirect, url_for, flash
+from flask import Blueprint, Response, current_app, request, render_template, redirect, url_for, flash
 from werkzeug.security import generate_password_hash
+from werkzeug.utils import secure_filename
 from flask_login import current_user, login_required
 from datetime import datetime, timezone
 from .models import User, Puzzle, Hint, Issue, Submission, Erratum, PuzzleAnswerRule
@@ -20,6 +23,8 @@ from .reporting import (
 )
 
 admin_bp = Blueprint('admin', __name__, url_prefix='/admin')
+
+ALLOWED_UPLOAD_EXTENSIONS = {'pdf'}
 
 
 def _parse_optional_int(value):
@@ -42,6 +47,35 @@ def _csv_response(filename, headers, rows):
         mimetype='text/csv',
         headers={'Content-Disposition': f'attachment; filename={filename}'},
     )
+
+
+def _is_allowed_upload(filename):
+    if not filename or '.' not in filename:
+        return False
+    extension = filename.rsplit('.', 1)[1].lower()
+    return extension in ALLOWED_UPLOAD_EXTENSIONS
+
+
+def _save_issue_pdf(uploaded_file, filename_prefix):
+    if not uploaded_file or not uploaded_file.filename:
+        return None
+
+    if not _is_allowed_upload(uploaded_file.filename):
+        raise ValueError('Only PDF files are allowed.')
+
+    original_name = secure_filename(uploaded_file.filename)
+    _, extension = os.path.splitext(original_name)
+    timestamp = datetime.now(timezone.utc).strftime('%Y%m%d_%H%M%S')
+    unique_suffix = uuid.uuid4().hex[:8]
+    final_filename = f"{filename_prefix}_{timestamp}_{unique_suffix}{extension.lower()}"
+
+    upload_dir = current_app.config.get('PDF_UPLOAD_FOLDER')
+    if not upload_dir:
+        upload_dir = os.path.join(current_app.root_path, 'static', 'pdfs')
+
+    os.makedirs(upload_dir, exist_ok=True)
+    uploaded_file.save(os.path.join(upload_dir, final_filename))
+    return final_filename
 
 @admin_bp.route('/users')
 @login_required
@@ -71,11 +105,26 @@ def add_issue():
     form = IssueForm()
     
     if form.validate_on_submit():
+        issue_pdf_filename = (form.pdf_filename.data or '').strip() or None
+        answer_pdf_filename = (form.answer_pdf_filename.data or '').strip() or None
+
+        issue_pdf_upload = form.pdf_upload.data
+        answer_pdf_upload = form.answer_pdf_upload.data
+
+        try:
+            if issue_pdf_upload and issue_pdf_upload.filename:
+                issue_pdf_filename = _save_issue_pdf(issue_pdf_upload, 'issue_pdf')
+            if answer_pdf_upload and answer_pdf_upload.filename:
+                answer_pdf_filename = _save_issue_pdf(answer_pdf_upload, 'issue_answers')
+        except ValueError as exc:
+            flash(str(exc))
+            return render_template('admin_add_issue.html', form=form)
+
         new_issue = Issue(
             title=form.title.data,
             description=form.description.data,
-            pdf_filename=form.pdf_filename.data or None,
-            answer_pdf_filename=form.answer_pdf_filename.data or None,
+            pdf_filename=issue_pdf_filename,
+            answer_pdf_filename=answer_pdf_filename,
             available_date=form.available_date.data
         )
         db.session.add(new_issue)
@@ -295,10 +344,25 @@ def edit_issue(issue_id):
     form = IssueForm(obj=issue)
     
     if form.validate_on_submit():
+        issue_pdf_filename = (form.pdf_filename.data or '').strip() or None
+        answer_pdf_filename = (form.answer_pdf_filename.data or '').strip() or None
+
+        issue_pdf_upload = form.pdf_upload.data
+        answer_pdf_upload = form.answer_pdf_upload.data
+
+        try:
+            if issue_pdf_upload and issue_pdf_upload.filename:
+                issue_pdf_filename = _save_issue_pdf(issue_pdf_upload, f'issue_{issue.id}')
+            if answer_pdf_upload and answer_pdf_upload.filename:
+                answer_pdf_filename = _save_issue_pdf(answer_pdf_upload, f'issue_{issue.id}_answers')
+        except ValueError as exc:
+            flash(str(exc))
+            return render_template('admin_edit_issue.html', form=form, issue=issue)
+
         issue.title = form.title.data
         issue.description = form.description.data
-        issue.pdf_filename = form.pdf_filename.data or None
-        issue.answer_pdf_filename = form.answer_pdf_filename.data or None
+        issue.pdf_filename = issue_pdf_filename
+        issue.answer_pdf_filename = answer_pdf_filename
         issue.available_date = form.available_date.data
         
         db.session.commit()

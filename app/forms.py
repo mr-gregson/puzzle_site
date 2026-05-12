@@ -1,4 +1,5 @@
 from flask_wtf import FlaskForm
+from flask_wtf.file import FileField
 from wtforms import StringField, PasswordField, SubmitField, TextAreaField, SelectField, HiddenField, BooleanField
 from wtforms.fields import DateField, TextAreaField, IntegerField, DateTimeLocalField
 
@@ -24,8 +25,10 @@ class AnswerForm(FlaskForm):
 class IssueForm(FlaskForm):
     title = StringField('Issue Title', validators=[DataRequired()])
     description = TextAreaField('Description')
-    pdf_filename = StringField('PDF Filename (in static/pdfs/)')
-    answer_pdf_filename = StringField('Answer PDF Filename (in static/pdfs/)')
+    pdf_filename = StringField('PDF Filename (optional, in static/pdfs/)')
+    answer_pdf_filename = StringField('Answer PDF Filename (optional, in static/pdfs/)')
+    pdf_upload = FileField('Upload Issue PDF (.pdf)', validators=[Optional()])
+    answer_pdf_upload = FileField('Upload Answer Key PDF (.pdf)', validators=[Optional()])
     available_date = DateTimeLocalField('Available Date & Time (UTC)', format='%Y-%m-%dT%H:%M', validators=[DataRequired()])
     submit = SubmitField('Create Issue')
 
