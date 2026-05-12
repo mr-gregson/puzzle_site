@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+{% block content %}
+<h2>Puzzle Solver Detail: {{ puzzle.title }}</h2>
+
+<div class="admin-header">
+    <a href="{{ url_for('admin.report_puzzles') }}" class="action-btn">Back to Puzzle Report</a>
+    <a href="{{ url_for('admin.report_puzzle_detail_export', puzzle_id=puzzle.id) }}" class="action-btn">Export CSV</a>
+</div>
+
+<table>
+    <tr>
+        <th>User ID</th>
+        <th>Username</th>
+        <th>Total Attempts</th>
+        <th>Correct Submissions</th>
+        <th>Incorrect Before First Solve</th>
+        <th>First Correct Submission</th>
+    </tr>
+    {% for row in solver_rows %}
+    <tr>
+        <td>{{ row.user_id }}</td>
+        <td>{{ row.username }}</td>
+        <td>{{ row.attempt_count }}</td>
+        <td>{{ row.correct_submission_count }}</td>
+        <td>{{ row.incorrect_before_solve }}</td>
+        <td>
+            {% if row.first_correct_at %}
+            <span data-utc-datetime="{{ row.first_correct_at.strftime('%Y-%m-%d %H:%M:%S') }}" data-format="short">
+                {{ row.first_correct_at.strftime('%Y-%m-%d %H:%M') }}
+            </span>
+            {% else %}
+                -
+            {% endif %}
+        </td>
+    </tr>
+    {% endfor %}
+</table>
+
+{% if not solver_rows %}
+<p>No users have solved this puzzle yet.</p>
+{% endif %}
+{% endblock %}

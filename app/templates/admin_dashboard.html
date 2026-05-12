@@ -26,6 +26,10 @@
             <p>Correct Submissions</p>
         </div>
         <div class="stat-item">
+            <h4>{{ stats.total_distinct_solves }}</h4>
+            <p>Distinct Solves</p>
+        </div>
+        <div class="stat-item">
             <h4>{{ stats.total_errata }}</h4>
             <p>Total Errata</p>
         </div>
@@ -44,10 +48,65 @@
         <a href="{{ url_for('admin.issue_list') }}" class="action-btn">Manage Issues</a>
         <a href="{{ url_for('admin.hint_list') }}" class="action-btn">Manage Hints</a>
         <a href="{{ url_for('admin.errata_list') }}" class="action-btn">Manage Errata</a>
+        <a href="{{ url_for('admin.reports_index') }}" class="action-btn">View Reports</a>
         <a href="{{ url_for('admin.add_issue') }}" class="action-btn">Create New Issue</a>
         <a href="{{ url_for('admin.add_puzzle') }}" class="action-btn">Create New Puzzle</a>
         <a href="{{ url_for('admin.add_hint') }}" class="action-btn">Add New Hint</a>
         <a href="{{ url_for('admin.add_erratum') }}" class="action-btn">Add New Erratum</a>
+    </div>
+</div>
+
+<div class="recent-activity">
+    <h3>Reporting Snapshot</h3>
+    <div class="activity-section">
+        <h4>Top Solved Puzzles</h4>
+        <table>
+            <tr>
+                <th>Puzzle</th>
+                <th>Solvers</th>
+            </tr>
+            {% for puzzle in stats.reporting.top_solved_puzzles %}
+            <tr>
+                <td>{{ puzzle.title }}</td>
+                <td>{{ puzzle.solve_count }}</td>
+            </tr>
+            {% endfor %}
+        </table>
+        <p><a href="{{ url_for('admin.report_puzzles') }}">Open puzzle report</a></p>
+    </div>
+
+    <div class="activity-section">
+        <h4>Top Users by Solves</h4>
+        <table>
+            <tr>
+                <th>User</th>
+                <th>Solved Puzzles</th>
+            </tr>
+            {% for user in stats.reporting.top_users %}
+            <tr>
+                <td>{{ user.username }}</td>
+                <td>{{ user.solved_puzzles }}</td>
+            </tr>
+            {% endfor %}
+        </table>
+        <p><a href="{{ url_for('admin.report_users') }}">Open user report</a></p>
+    </div>
+
+    <div class="activity-section">
+        <h4>Unsolved Puzzles</h4>
+        <table>
+            <tr>
+                <th>Puzzle</th>
+            </tr>
+            {% for puzzle in stats.reporting.unsolved_puzzles %}
+            <tr>
+                <td>{{ puzzle.title }}</td>
+            </tr>
+            {% endfor %}
+        </table>
+        {% if not stats.reporting.unsolved_puzzles %}
+        <p>Every puzzle has at least one solver.</p>
+        {% endif %}
     </div>
 </div>
 

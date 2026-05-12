@@ -1,0 +1,76 @@
+{% extends "base.html" %}
+{% block content %}
+<h2>Selected Answer Feedback: {{ puzzle.title }}</h2>
+
+<div class="admin-header">
+    <a href="{{ url_for('admin.edit_puzzle', puzzle_id=puzzle.id) }}" class="action-btn">Back to Puzzle</a>
+    <a href="{{ url_for('admin.puzzle_list') }}" class="action-btn">Back to Puzzle List</a>
+</div>
+
+<h3>Add or Update Rule</h3>
+<form method="POST">
+    {{ form.hidden_tag() }}
+    <div class="form-group">
+        {{ form.answer.label(class="form-label") }}
+        {{ form.answer(class="form-input", placeholder="Example: aman") }}
+        {% if form.answer.errors %}
+            {% for error in form.answer.errors %}
+                <div class="error">{{ error }}</div>
+            {% endfor %}
+        {% endif %}
+        <small>Answer matching is normalized (lowercase, punctuation/spaces removed).</small>
+    </div>
+
+    <div class="form-group">
+        {{ form.feedback_text.label(class="form-label") }}
+        {{ form.feedback_text(class="form-input", rows=4, placeholder="Optional feedback. Use {answer} to include submitted text.") }}
+        {% if form.feedback_text.errors %}
+            {% for error in form.feedback_text.errors %}
+                <div class="error">{{ error }}</div>
+            {% endfor %}
+        {% endif %}
+    </div>
+
+    <div class="form-group">
+        {{ form.outcome.label(class="form-label") }}
+        {{ form.outcome(class="form-input") }}
+    </div>
+
+    <div class="form-actions">
+        {{ form.submit(class="submit-btn") }}
+    </div>
+</form>
+
+<h3>Existing Rules</h3>
+<table>
+    <tr>
+        <th>Normalized Answer</th>
+        <th>Outcome Override</th>
+        <th>Feedback</th>
+        <th>Actions</th>
+    </tr>
+    {% for rule in rules %}
+    <tr>
+        <td>{{ rule.answer_normalized }}</td>
+        <td>
+            {% if rule.is_correct_override is sameas true %}
+                Correct
+            {% elif rule.is_correct_override is sameas false %}
+                Incorrect
+            {% else %}
+                Neutral
+            {% endif %}
+        </td>
+        <td>{{ rule.feedback_text or '-' }}</td>
+        <td>
+            <a href="{{ url_for('admin.delete_puzzle_response_rule', rule_id=rule.id) }}"
+               onclick="return confirm('Delete this response rule?')">Delete</a>
+        </td>
+    </tr>
+    {% endfor %}
+</table>
+
+{% if not rules %}
+<p>No selected-answer rules yet.</p>
+{% endif %}
+{% endblock %}

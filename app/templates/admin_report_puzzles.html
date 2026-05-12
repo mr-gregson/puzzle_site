@@ -1,0 +1,63 @@
+{% extends "base.html" %}
+{% block content %}
+<h2>Puzzle Performance Report</h2>
+
+<div class="admin-header">
+    <a href="{{ url_for('admin.reports_index') }}" class="action-btn">All Reports</a>
+    <a href="{{ url_for('admin.report_puzzles_export', issue_id=selected_issue_id, sort=selected_sort) }}" class="action-btn">Export CSV</a>
+</div>
+
+<form method="get" class="report-filters">
+    <div class="filter-group">
+        <label for="issue_id">Issue</label>
+        <select id="issue_id" name="issue_id">
+            <option value="">All Issues</option>
+            {% for issue in issues %}
+                <option value="{{ issue.id }}" {% if selected_issue_id == issue.id %}selected{% endif %}>{{ issue.title }}</option>
+            {% endfor %}
+        </select>
+    </div>
+
+    <div class="filter-group">
+        <label for="sort">Sort</label>
+        <select id="sort" name="sort">
+            <option value="most_solved" {% if selected_sort == 'most_solved' %}selected{% endif %}>Most Solved</option>
+            <option value="least_solved" {% if selected_sort == 'least_solved' %}selected{% endif %}>Least Solved</option>
+            <option value="most_attempted" {% if selected_sort == 'most_attempted' %}selected{% endif %}>Most Attempted</option>
+            <option value="title" {% if selected_sort == 'title' %}selected{% endif %}>Title</option>
+        </select>
+    </div>
+
+    <div class="filter-actions">
+        <button type="submit">Apply</button>
+        <a href="{{ url_for('admin.report_puzzles') }}" class="action-btn">Reset</a>
+    </div>
+</form>
+
+<table>
+    <tr>
+        <th>Puzzle</th>
+        <th>Issue</th>
+        <th>Solvers</th>
+        <th>Attempts</th>
+        <th>Correct Submissions</th>
+        <th>Success Rate</th>
+        <th>Actions</th>
+    </tr>
+    {% for row in puzzle_rows %}
+    <tr>
+        <td>{{ row.puzzle_title }}</td>
+        <td>{{ row.issue_title or 'Unassigned' }}</td>
+        <td>{{ row.solve_count }}</td>
+        <td>{{ row.attempt_count }}</td>
+        <td>{{ row.correct_submission_count }}</td>
+        <td>{{ "%.1f"|format(row.success_rate) }}%</td>
+        <td><a href="{{ url_for('admin.report_puzzle_detail', puzzle_id=row.puzzle_id) }}">View Solvers</a></td>
+    </tr>
+    {% endfor %}
+</table>
+
+{% if not puzzle_rows %}
+<p>No puzzle data matched your filters.</p>
+{% endif %}
+{% endblock %}

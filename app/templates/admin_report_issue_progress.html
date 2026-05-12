@@ -1,0 +1,69 @@
+{% extends "base.html" %}
+{% block content %}
+<h2>User Progress by Issue</h2>
+
+<div class="admin-header">
+    <a href="{{ url_for('admin.reports_index') }}" class="action-btn">All Reports</a>
+    <a href="{{ url_for('admin.report_issue_progress_export', user_id=selected_user_id, issue_id=selected_issue_id, sort=selected_sort) }}" class="action-btn">Export CSV</a>
+</div>
+
+<form method="get" class="report-filters">
+    <div class="filter-group">
+        <label for="user_id">User</label>
+        <select id="user_id" name="user_id">
+            <option value="">All Users</option>
+            {% for user in users %}
+                <option value="{{ user.id }}" {% if selected_user_id == user.id %}selected{% endif %}>{{ user.username }}</option>
+            {% endfor %}
+        </select>
+    </div>
+
+    <div class="filter-group">
+        <label for="issue_id">Issue</label>
+        <select id="issue_id" name="issue_id">
+            <option value="">All Issues</option>
+            {% for issue in issues %}
+                <option value="{{ issue.id }}" {% if selected_issue_id == issue.id %}selected{% endif %}>{{ issue.title }}</option>
+            {% endfor %}
+        </select>
+    </div>
+
+    <div class="filter-group">
+        <label for="sort">Sort</label>
+        <select id="sort" name="sort">
+            <option value="best_completion" {% if selected_sort == 'best_completion' %}selected{% endif %}>Best Completion</option>
+            <option value="least_completion" {% if selected_sort == 'least_completion' %}selected{% endif %}>Least Completion</option>
+            <option value="username" {% if selected_sort == 'username' %}selected{% endif %}>Username</option>
+            <option value="issue" {% if selected_sort == 'issue' %}selected{% endif %}>Issue</option>
+        </select>
+    </div>
+
+    <div class="filter-actions">
+        <button type="submit">Apply</button>
+        <a href="{{ url_for('admin.report_issue_progress') }}" class="action-btn">Reset</a>
+    </div>
+</form>
+
+<table>
+    <tr>
+        <th>User</th>
+        <th>Issue</th>
+        <th>Solved</th>
+        <th>Total Puzzles</th>
+        <th>Completion</th>
+    </tr>
+    {% for row in progress_rows %}
+    <tr>
+        <td>{{ row.username }}</td>
+        <td>{{ row.issue_title }}</td>
+        <td>{{ row.solved_count }}</td>
+        <td>{{ row.total_puzzles }}</td>
+        <td>{{ "%.1f"|format(row.completion_rate) }}%</td>
+    </tr>
+    {% endfor %}
+</table>
+
+{% if not progress_rows %}
+<p>No issue progress rows matched your filters.</p>
+{% endif %}
+{% endblock %}

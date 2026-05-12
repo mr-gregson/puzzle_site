@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+{% block content %}
+<h2>Admin Reports</h2>
+
+<p>Use these reports to inspect puzzle performance, user progress, and issue completion trends.</p>
+
+<div class="admin-actions">
+    <div class="action-grid">
+        <a href="{{ url_for('admin.report_puzzles') }}" class="action-btn">Puzzle Performance Report</a>
+        <a href="{{ url_for('admin.report_users') }}" class="action-btn">User Solve Report</a>
+        <a href="{{ url_for('admin.report_issue_progress') }}" class="action-btn">Issue Progress Report</a>
+        <a href="{{ url_for('admin.dashboard') }}" class="action-btn">Back to Dashboard</a>
+    </div>
+</div>
+{% endblock %}

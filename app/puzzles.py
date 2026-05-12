@@ -1,6 +1,6 @@
 from flask import Blueprint, render_template, redirect, url_for, request, flash
 from flask_login import login_required, current_user
-from .models import Puzzle, Submission, Hint, Issue, Erratum
+from .models import Puzzle, Submission, Hint, Issue, Erratum, PuzzleAnswerRule
 from .forms import AnswerForm
 from . import db
 from datetime import date, datetime, timezone
@@ -13,6 +13,12 @@ def normalize_answer(text):
             return ''.join(
                 c for c in text.lower() if c not in string.punctuation and not c.isspace()
             )
+
+
+def _render_feedback_message(template, submitted_answer):
+    if not template:
+        return None
+    return template.replace('{answer}', submitted_answer)
 
 puzzle_bp = Blueprint('puzzle', __name__)
 
@@ -98,7 +104,15 @@ def puzzle_detail(puzzle_id):
 
         submitted_raw = form.answer.data
         submitted = normalize_answer(submitted_raw)
-        correct = check_password_hash(puzzle.answer_hash, submitted)
+        response_rule = PuzzleAnswerRule.query.filter_by(
+            puzzle_id=puzzle.id,
+            answer_normalized=submitted,
+        ).first()
+
+        if response_rule and response_rule.is_correct_override is not None:
+            correct = response_rule.is_correct_override
+        else:
+            correct = check_password_hash(puzzle.answer_hash, submitted)
 
 
         submission = Submission(
@@ -111,9 +125,27 @@ def puzzle_detail(puzzle_id):
         db.session.commit()
 
         if correct:
-            flash(f"✅ '{submitted_raw}' is correct!")
+            response_text = None
+            if response_rule and response_rule.feedback_text:
+                response_text = _render_feedback_message(response_rule.feedback_text, submitted_raw)
+            elif puzzle.correct_response:
+                response_text = _render_feedback_message(puzzle.correct_response, submitted_raw)
+
+            if response_text:
+                flash(f"✅ {response_text}")
+            else:
+                flash(f"✅ '{submitted_raw}' is correct!")
         else:
-            flash(f"❌ '{submitted_raw}' is incorrect.")
+            response_text = None
+            if response_rule and response_rule.feedback_text:
+                response_text = _render_feedback_message(response_rule.feedback_text, submitted_raw)
+            elif puzzle.incorrect_response:
+                response_text = _render_feedback_message(puzzle.incorrect_response, submitted_raw)
+
+            if response_text:
+                flash(f"❌ {response_text}")
+            else:
+                flash(f"❌ '{submitted_raw}' is incorrect.")
 
         return redirect(url_for('puzzle.puzzle_detail', puzzle_id=puzzle_id))
 

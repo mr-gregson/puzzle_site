@@ -264,6 +264,43 @@ form input[type="submit"]:hover, form button:hover {
     align-items: center;
 }
 
+.report-filters {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    align-items: end;
+    margin: 15px 0 20px 0;
+    padding: 12px;
+    border: 1px solid #dcdfe3;
+    border-radius: 6px;
+    background: #f8f9fa;
+}
+
+.filter-group {
+    display: flex;
+    flex-direction: column;
+    min-width: 180px;
+}
+
+.filter-group label {
+    font-weight: 600;
+    margin-bottom: 4px;
+}
+
+.filter-group select {
+    margin-bottom: 0;
+}
+
+.filter-actions {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+}
+
+.filter-actions .action-btn {
+    padding: 10px 14px;
+}
+
 .error {
     color: #e74c3c;
     font-size: 0.9em;

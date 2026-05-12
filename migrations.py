@@ -5,8 +5,19 @@ Run this script to set up the production database.
 import os
 import sys
 from flask import Flask
+from sqlalchemy import inspect, text
 from app import create_app, db
-from app.models import User, Issue, Puzzle, Submission, Hint
+from app.models import User, Issue, Puzzle, Submission, Hint, PuzzleAnswerRule
+
+
+def _ensure_column_exists(table_name, column_name, ddl_fragment):
+    inspector = inspect(db.engine)
+    columns = [col['name'] for col in inspector.get_columns(table_name)]
+    if column_name in columns:
+        return
+    db.session.execute(text(f"ALTER TABLE {table_name} ADD COLUMN {column_name} {ddl_fragment}"))
+    db.session.commit()
+    print(f"✓ Added column: {table_name}.{column_name}")
 
 def create_database():
     """Create all database tables."""
@@ -16,6 +27,16 @@ def create_database():
         # Create all tables
         db.create_all()
         print("✓ Database tables created successfully")
+
+        # Ensure schema updates for existing databases
+        _ensure_column_exists('puzzle', 'correct_response', 'TEXT')
+        _ensure_column_exists('puzzle', 'incorrect_response', 'TEXT')
+
+        inspector = inspect(db.engine)
+        tables = inspector.get_table_names()
+        if 'puzzle_answer_rule' not in tables:
+            PuzzleAnswerRule.__table__.create(db.engine)
+            print('✓ Created table: puzzle_answer_rule')
         
         # Create default admin user if it doesn't exist
         admin_email = os.environ.get('PUZZLE_SITE_ADMIN', 'admin@example.com')

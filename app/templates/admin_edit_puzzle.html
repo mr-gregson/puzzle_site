@@ -29,6 +29,24 @@
         {% endif %}
         <small>Leave blank to keep the current answer unchanged.</small>
     </div>
+
+    <div>
+        {{ form.correct_response.label }}
+        {{ form.correct_response(rows=4, placeholder="Optional. Use {answer} to include the submitted text.") }}
+        {% if form.correct_response.errors %}
+            <div class="error">{{ form.correct_response.errors[0] }}</div>
+        {% endif %}
+        <small>Shown when a submission is marked correct and no answer-specific rule message applies.</small>
+    </div>
+
+    <div>
+        {{ form.incorrect_response.label }}
+        {{ form.incorrect_response(rows=4, placeholder="Optional. Use {answer} to include the submitted text.") }}
+        {% if form.incorrect_response.errors %}
+            <div class="error">{{ form.incorrect_response.errors[0] }}</div>
+        {% endif %}
+        <small>Shown when a submission is marked incorrect and no answer-specific rule message applies.</small>
+    </div>
     
     <div>
         {{ form.issue_id.label }}
@@ -41,6 +59,7 @@
     <div>
         <input type="submit" value="Update Puzzle">
         <a href="{{ url_for('admin.puzzle_list') }}">Cancel</a>
+        <a href="{{ url_for('admin.puzzle_response_rules', puzzle_id=puzzle.id) }}">Manage Selected Answer Feedback</a>
     </div>
 </form>
 

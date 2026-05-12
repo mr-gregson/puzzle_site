@@ -7,7 +7,9 @@
     {{ form.description.label }}<br>{{ form.description(rows=4, cols=60) }}<br><br>
     {{ form.issue_id.label }}<br>{{ form.issue_id() }}<br><br>
     {{ form.answer.label }}<br>{{ form.answer(size=50) }}<br><br>
+    {{ form.correct_response.label }}<br>{{ form.correct_response(rows=3, cols=60, placeholder="Optional. Use {answer} to include the submitted text.") }}<br><br>
+    {{ form.incorrect_response.label }}<br>{{ form.incorrect_response(rows=3, cols=60, placeholder="Optional. Use {answer} to include the submitted text.") }}<br><br>
     {{ form.submit() }}
 </form>
-<a href="{{ url_for('admin.user_list') }}">Back to Admin Panel</a>
+<a href="{{ url_for('admin.puzzle_list') }}">Back to Puzzle Management</a>
 {% endblock %}

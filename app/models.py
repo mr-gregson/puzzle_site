@@ -3,6 +3,7 @@ from datetime import datetime, timezone
 from flask_login import UserMixin
 from itsdangerous import URLSafeTimedSerializer
 from flask import current_app
+from sqlalchemy import UniqueConstraint
 
 class User(UserMixin, db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -40,11 +41,28 @@ class Puzzle(db.Model):
     title = db.Column(db.String(200), nullable=False)
     description = db.Column(db.Text, nullable=False)
     answer_hash = db.Column(db.String(200), nullable=False)
+    correct_response = db.Column(db.Text, nullable=True)
+    incorrect_response = db.Column(db.Text, nullable=True)
     created_at = db.Column(db.DateTime, default=lambda: datetime.now(timezone.utc))
     issue_id = db.Column(db.Integer, db.ForeignKey('issue.id'), nullable=True)
 
     hints = db.relationship('Hint', backref='puzzle', lazy=True)
     submissions = db.relationship('Submission', backref='puzzle', lazy=True)
+    response_rules = db.relationship('PuzzleAnswerRule', backref='puzzle', lazy=True, cascade='all, delete-orphan')
+
+
+class PuzzleAnswerRule(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    puzzle_id = db.Column(db.Integer, db.ForeignKey('puzzle.id'), nullable=False)
+    answer_normalized = db.Column(db.String(255), nullable=False)
+    feedback_text = db.Column(db.Text, nullable=True)
+    # None means do not override hash-check correctness.
+    is_correct_override = db.Column(db.Boolean, nullable=True)
+    created_at = db.Column(db.DateTime, default=lambda: datetime.now(timezone.utc))
+
+    __table_args__ = (
+        UniqueConstraint('puzzle_id', 'answer_normalized', name='uq_puzzle_answer_rule_answer'),
+    )
 
 class Submission(db.Model):
     id = db.Column(db.Integer, primary_key=True)

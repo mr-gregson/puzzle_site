@@ -1,0 +1,50 @@
+{% extends "base.html" %}
+{% block content %}
+<h2>User Solve Report</h2>
+
+<div class="admin-header">
+    <a href="{{ url_for('admin.reports_index') }}" class="action-btn">All Reports</a>
+    <a href="{{ url_for('admin.report_users_export', sort=selected_sort) }}" class="action-btn">Export CSV</a>
+</div>
+
+<form method="get" class="report-filters">
+    <div class="filter-group">
+        <label for="sort">Sort</label>
+        <select id="sort" name="sort">
+            <option value="most_solved" {% if selected_sort == 'most_solved' %}selected{% endif %}>Most Solved</option>
+            <option value="most_attempted" {% if selected_sort == 'most_attempted' %}selected{% endif %}>Most Attempted</option>
+            <option value="username" {% if selected_sort == 'username' %}selected{% endif %}>Username</option>
+        </select>
+    </div>
+
+    <div class="filter-actions">
+        <button type="submit">Apply</button>
+        <a href="{{ url_for('admin.report_users') }}" class="action-btn">Reset</a>
+    </div>
+</form>
+
+<table>
+    <tr>
+        <th>User</th>
+        <th>Email</th>
+        <th>Solved Puzzles</th>
+        <th>Attempts</th>
+        <th>Correct Submissions</th>
+        <th>Success Rate</th>
+    </tr>
+    {% for row in user_rows %}
+    <tr>
+        <td>{{ row.username }}</td>
+        <td>{{ row.email }}</td>
+        <td>{{ row.solved_puzzles }}</td>
+        <td>{{ row.attempt_count }}</td>
+        <td>{{ row.correct_submission_count }}</td>
+        <td>{{ "%.1f"|format(row.success_rate) }}%</td>
+    </tr>
+    {% endfor %}
+</table>
+
+{% if not user_rows %}
+<p>No user data available.</p>
+{% endif %}
+{% endblock %}

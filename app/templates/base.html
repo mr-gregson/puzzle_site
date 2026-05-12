@@ -86,6 +86,7 @@ document.addEventListener('DOMContentLoaded', convertDatesToLocal);
             <a href="{{ url_for('puzzle.errata_list') }}">Errata</a>
             {% if current_user.is_admin %}
                 <a href="{{ url_for('admin.dashboard') }}">Admin</a>
+                <a href="{{ url_for('admin.reports_index') }}">Reports</a>
             {% endif %}
         {% else %}
             <a href="{{ url_for('main.index') }}">Home</a>

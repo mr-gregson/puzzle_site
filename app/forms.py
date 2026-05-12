@@ -2,7 +2,7 @@ from flask_wtf import FlaskForm
 from wtforms import StringField, PasswordField, SubmitField, TextAreaField, SelectField, HiddenField, BooleanField
 from wtforms.fields import DateField, TextAreaField, IntegerField, DateTimeLocalField
 
-from wtforms.validators import DataRequired, Email, EqualTo, Length
+from wtforms.validators import DataRequired, Email, EqualTo, Length, Optional
 
 class RegisterForm(FlaskForm):
     username = StringField('Username', validators=[DataRequired(), Length(min=3, max=150)])
@@ -32,9 +32,26 @@ class IssueForm(FlaskForm):
 class PuzzleForm(FlaskForm):
     title = StringField('Title', validators=[DataRequired()])
     description = TextAreaField('Description', validators=[DataRequired()])
-    answer = StringField('Answer', validators=[DataRequired()])
+    answer = StringField('Answer', validators=[Optional()])
+    correct_response = TextAreaField('Custom Correct Response', validators=[Optional(), Length(max=2000)])
+    incorrect_response = TextAreaField('Custom Incorrect Response', validators=[Optional(), Length(max=2000)])
     issue_id = SelectField('Issue', coerce=int)
     submit = SubmitField('Create Puzzle')
+
+
+class PuzzleAnswerRuleForm(FlaskForm):
+    answer = StringField('Answer to Match', validators=[DataRequired(), Length(max=255)])
+    feedback_text = TextAreaField('Feedback Message', validators=[Optional(), Length(max=2000)])
+    outcome = SelectField(
+        'Outcome Override',
+        choices=[
+            ('neutral', 'Do not override correctness'),
+            ('correct', 'Treat this answer as correct'),
+            ('incorrect', 'Treat this answer as incorrect'),
+        ],
+        default='neutral',
+    )
+    submit = SubmitField('Add Response Rule')
 
 class HintForm(FlaskForm):
     puzzle_id = SelectField('Puzzle', coerce=int, validators=[DataRequired()])
