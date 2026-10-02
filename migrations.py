@@ -4,7 +4,6 @@ Run this script to set up the production database.
 """
 import os
 import sys
-from flask import Flask
 from sqlalchemy import inspect, text
 from app import create_app, db
 from app.models import User, Issue, Puzzle, Submission, Hint, PuzzleAnswerRule
@@ -31,29 +30,30 @@ def create_database():
         # Ensure schema updates for existing databases
         _ensure_column_exists('puzzle', 'correct_response', 'TEXT')
         _ensure_column_exists('puzzle', 'incorrect_response', 'TEXT')
-
-        inspector = inspect(db.engine)
-        tables = inspector.get_table_names()
-        if 'puzzle_answer_rule' not in tables:
-            PuzzleAnswerRule.__table__.create(db.engine)
-            print('✓ Created table: puzzle_answer_rule')
+        _ensure_column_exists('issue', 'answer_pdf_filename', 'VARCHAR(200)')
         
         # Create default admin user if it doesn't exist
         admin_email = os.environ.get('PUZZLE_SITE_ADMIN', 'admin@example.com')
         admin_user = User.query.filter_by(email=admin_email).first()
         
         if not admin_user:
-            from werkzeug.security import generate_password_hash
-            admin_user = User(
-                username='admin',
-                email=admin_email,
-                password_hash=generate_password_hash('change-this-password'),
-                is_admin=True
-            )
-            db.session.add(admin_user)
-            db.session.commit()
-            print(f"✓ Default admin user created: {admin_email}")
-            print("⚠️  IMPORTANT: Change the default admin password!")
+            initial_admin_password = os.environ.get('INITIAL_ADMIN_PASSWORD')
+            if initial_admin_password:
+                from werkzeug.security import generate_password_hash
+                admin_user = User(
+                    username=os.environ.get('INITIAL_ADMIN_USERNAME', 'admin'),
+                    email=admin_email,
+                    password_hash=generate_password_hash(initial_admin_password),
+                    is_admin=True
+                )
+                db.session.add(admin_user)
+                db.session.commit()
+                print(f"✓ Initial admin user created: {admin_email}")
+            else:
+                print(
+                    f"⚠️  No admin account exists for {admin_email}. Set "
+                    "INITIAL_ADMIN_PASSWORD to create one during this migration."
+                )
         else:
             print(f"✓ Admin user already exists: {admin_email}")
 

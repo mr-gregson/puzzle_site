@@ -46,12 +46,32 @@ print(secrets.token_hex(32))
 
 ### Step 3: Set Up Database
 ```bash
-# Run database migrations
-python migrations.py
-
-# Optional: backup existing SQLite database
+# Optional backup for a local SQLite database only. For PostgreSQL/MySQL,
+# take a database-native snapshot before deploying schema changes.
 python migrations.py --backup
+
+# Run the idempotent schema upgrade
+python migrations.py
 ```
+
+The migration creates newly introduced tables such as `erratum` and
+`puzzle_answer_rule`, and adds `issue.answer_pdf_filename` plus the puzzle
+response columns to existing databases. It does not replace a database backup.
+The production startup script runs the migration automatically before Gunicorn.
+For a multi-instance deployment, run `./start_production.sh migrate` once as a
+release job, then set `MIGRATE_ON_START=false` for every web instance. Do not
+let several instances apply schema changes concurrently.
+
+On a brand-new database, set `INITIAL_ADMIN_PASSWORD` for the first startup if
+the migration should create the initial admin account. The account email comes
+from `PUZZLE_SITE_ADMIN`; unset the one-time password after creation. No
+default admin password is created.
+
+Timed email notifications run in the separate `scheduler` service in Docker
+Compose. Keep exactly one scheduler instance in production; do not run it inside
+each Gunicorn worker. For non-Compose deployments, run
+`python scheduler_worker.py` as a separate single-instance service after the
+database migration has completed.
 
 ### Step 4: Test Email Configuration
 ```bash
@@ -63,7 +83,7 @@ python test_email.py
 # Make start script executable (Linux/Mac)
 chmod +x start_production.sh
 
-# Start the application
+# Apply migrations and start Gunicorn (dependencies must already be installed)
 ./start_production.sh
 ```
 
@@ -96,11 +116,13 @@ The application provides several health check endpoints:
 - `MAIL_PASSWORD` - Email account password (use App Password for Gmail)
 - `MAIL_DEFAULT_SENDER` - Default sender email
 - `PUZZLE_SITE_ADMIN` - Admin email for notifications
+- `INITIAL_ADMIN_PASSWORD` - Optional one-time password for creating the initial admin account
 
 ### Optional Variables
 - `PORT` - Server port (default: 8000)
 - `GUNICORN_WORKERS` - Number of worker processes
 - `LOG_LEVEL` - Logging level (default: INFO)
+- `SESSION_COOKIE_SECURE` - Set to `true` when HTTPS is enabled
 
 ## 🗄️ Database Recommendations
 
@@ -110,7 +132,7 @@ The application provides several health check endpoints:
    DATABASE_URL=postgresql://username:password@hostname:5432/database
    ```
 
-2. **MySQL/MariaDB**
+2. **MySQL/MariaDB** (not supported by the checked-in requirements; add a compatible SQLAlchemy driver and test the migrations before using it)
    ```
    DATABASE_URL=mysql://username:password@hostname:3306/database
    ```

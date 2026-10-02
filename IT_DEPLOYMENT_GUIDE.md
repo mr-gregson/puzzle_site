@@ -62,6 +62,8 @@ PUZZLE_SITE_ADMIN=admin@yourdomain.com      # Admin notification email
 PORT=8000                                   # Application port (default: 8000)
 GUNICORN_WORKERS=4                          # Worker processes (default: CPU count)
 LOG_LEVEL=INFO                              # Logging level (DEBUG/INFO/WARNING/ERROR)
+SESSION_COOKIE_SECURE=true                 # Set true when served over HTTPS
+INITIAL_ADMIN_PASSWORD=<one-time-secret>    # Optional; creates the initial admin on first migration
 ```
 
 ## 🗄️ Database Setup
@@ -79,17 +81,20 @@ GRANT ALL PRIVILEGES ON DATABASE puzzlesite TO puzzleuser;
 # PostgreSQL
 DATABASE_URL=postgresql://puzzleuser:password@db-host:5432/puzzlesite
 
-# MySQL (alternative)
+# MySQL (requires adding a compatible SQLAlchemy driver; not included currently)
 DATABASE_URL=mysql://puzzleuser:password@db-host:3306/puzzlesite
 ```
 
 ### Database Initialization
-The application automatically creates tables on first run. To create an admin user:
+The web startup script applies the schema upgrades before starting Gunicorn. It
+creates the errata and answer-rule tables when missing and adds the newer answer
+PDF and response columns to existing databases. Back up the database first; run
+`./start_production.sh migrate` once as a release job before scaling to multiple
+web instances, then set `MIGRATE_ON_START=false` on those instances.
 
-```bash
-# Run database setup (creates tables + admin user)
-docker exec -it <container-name> python migrations.py
-```
+Set `INITIAL_ADMIN_PASSWORD` on the first deployment if an initial admin account
+should be created. Do not scale the `scheduler` service beyond one instance; it
+handles time-based email notifications separately from the Gunicorn workers.
 
 ## 🚀 Deployment Options
 

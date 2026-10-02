@@ -29,6 +29,7 @@ COPY . .
 
 # Create necessary directories
 RUN mkdir -p logs instance static/pdfs \
+    && chmod +x /app/start_production.sh \
     && chown -R puzzleuser:puzzleuser /app
 
 # Switch to non-root user
@@ -42,4 +43,4 @@ HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
     CMD curl -f http://localhost:8000/health || exit 1
 
 # Default command
-CMD ["gunicorn", "--config", "gunicorn.conf.py", "wsgi:app"]
+CMD ["./start_production.sh"]

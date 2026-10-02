@@ -13,7 +13,7 @@ This document provides a complete reference for all environment variables used b
 ### Database Configuration
 | Variable | Required | Default | Description |
 |----------|----------|---------|-------------|
-| `DATABASE_URL` | **Yes** | - | Full database connection URL. Format: `postgresql://user:pass@host:port/db` or `mysql://user:pass@host:port/db` |
+| `DATABASE_URL` | **Yes** | - | Full database connection URL. PostgreSQL is supported by the installed driver; MySQL requires adding a compatible SQLAlchemy driver. |
 
 ### Email Configuration (Required for user registration)
 | Variable | Required | Default | Description |
@@ -61,7 +61,7 @@ DATABASE_URL=postgresql://puzzleuser:secure_password@db.company.com:5432/puzzles
 # PostgreSQL with SSL
 DATABASE_URL=postgresql://puzzleuser:secure_password@db.company.com:5432/puzzlesite?sslmode=require
 
-# MySQL/MariaDB
+# MySQL/MariaDB (requires adding a compatible SQLAlchemy driver)
 DATABASE_URL=mysql://puzzleuser:secure_password@db.company.com:3306/puzzlesite
 
 # SQLite (development only)

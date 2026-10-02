@@ -24,6 +24,7 @@ def create_app():
     
     # Load config
     app.config.from_mapping(
+        ENVIRONMENT=os.environ.get('FLASK_ENV', 'development').lower(),
         SECRET_KEY=os.environ.get('SECRET_KEY') or 'dev-fallback-change-in-production',
         SQLALCHEMY_DATABASE_URI=os.environ.get('DATABASE_URL') or 'sqlite:///puzzle_site.db',
         SQLALCHEMY_TRACK_MODIFICATIONS=False,
@@ -31,8 +32,11 @@ def create_app():
         # Security settings
         WTF_CSRF_ENABLED=True,
         WTF_CSRF_TIME_LIMIT=None,
-        SESSION_COOKIE_SECURE=False,
-        REMEMBER_COOKIE_SECURE=False,
+        SESSION_COOKIE_SECURE=os.environ.get('SESSION_COOKIE_SECURE', 'false').lower() in ['true', 'on', '1'],
+        REMEMBER_COOKIE_SECURE=os.environ.get(
+            'REMEMBER_COOKIE_SECURE',
+            os.environ.get('SESSION_COOKIE_SECURE', 'false')
+        ).lower() in ['true', 'on', '1'],
         SESSION_COOKIE_HTTPONLY=True,
         SESSION_COOKIE_SAMESITE='Lax',
         # Email configuration
@@ -56,7 +60,7 @@ def create_app():
 
     db.init_app(app)
     login_manager.init_app(app)
-    login_manager.login_view = 'auth.login'
+    login_manager.login_view = 'auth.login' # type: ignore[assignment]
     mail.init_app(app)
 
 
@@ -100,8 +104,9 @@ def create_app():
     from .scheduler import scheduler
     scheduler.init_app(app)
     
-    # Start scheduler in development (not recommended for production)
-    if app.config.get('ENV') != 'production':
+    # Do not start background threads while importing a Gunicorn application.
+    # In production, run scheduled notifications as a separate single-instance service.
+    if app.config.get('ENVIRONMENT') != 'production':
         scheduler.start()
     
     # Configure logging for production
@@ -113,7 +118,7 @@ def create_app():
         response.headers['X-Content-Type-Options'] = 'nosniff'
         response.headers['X-Frame-Options'] = 'DENY'
         response.headers['X-XSS-Protection'] = '1; mode=block'
-        if app.config.get('ENV') == 'production':
+        if app.config.get('ENVIRONMENT') == 'production':
             response.headers['Strict-Transport-Security'] = 'max-age=31536000; includeSubDomains'
         return response
 

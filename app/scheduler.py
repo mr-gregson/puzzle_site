@@ -4,7 +4,6 @@ from .models import Issue, Hint, User, Submission
 from .email import notify_all_users_new_issue, notify_users_new_hint
 from . import db
 import threading
-import time
 
 
 class EmailScheduler:
@@ -14,6 +13,7 @@ class EmailScheduler:
         self.running = False
         self.thread = None
         self.app = None
+        self.stop_event = threading.Event()
     
     def init_app(self, app):
         """Initialize the scheduler with Flask app"""
@@ -22,6 +22,7 @@ class EmailScheduler:
     def start(self):
         """Start the background scheduler thread"""
         if not self.running and self.app:
+            self.stop_event.clear()
             self.running = True
             self.thread = threading.Thread(target=self._run_scheduler, daemon=True)
             self.thread.start()
@@ -29,8 +30,10 @@ class EmailScheduler:
     def stop(self):
         """Stop the background scheduler thread"""
         self.running = False
+        self.stop_event.set()
         if self.thread:
             self.thread.join()
+            self.thread = None
     
     def _run_scheduler(self):
         """Main scheduler loop - runs in background thread"""
@@ -42,8 +45,8 @@ class EmailScheduler:
                 except Exception as e:
                     print(f"Scheduler error: {e}")
                 
-                # Check every 10 minutes
-                time.sleep(600)
+                # Check every 10 minutes, but allow prompt shutdown on signals.
+                self.stop_event.wait(600)
     
     def _check_new_issues(self):
         """Check for issues that just became available"""

@@ -5,7 +5,8 @@ import os
 from app import create_app
 
 # Get the configuration environment
-config_name = os.environ.get('FLASK_ENV', 'production')
+config_name = os.environ.get('FLASK_ENV', 'production').lower()
+os.environ.setdefault('FLASK_ENV', config_name)
 
 # Create the Flask application
 app = create_app()
